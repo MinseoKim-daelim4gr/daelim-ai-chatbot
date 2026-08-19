@@ -1,0 +1,242 @@
+/* =========================================================================
+   대림대학교 브랜드 컬러 (학교 BI 가이드 기준)
+   기본색상: DUC Blue / DUC Gray
+   보조색상: DUC Silver / DUC Black / DUC Dark Brown / DUC Orange / DUC Green
+   ========================================================================= */
+:root {
+  --duc-blue: #0095c8;
+  --duc-blue-dark: #007399;
+  --duc-blue-tint: #e6f5fb;
+  --duc-gray: #666666;
+  --duc-silver: #a7a9ac;
+  --duc-black: #272425;
+  --duc-orange: #f18308;
+  --duc-green: #80bd26;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
+  background: #fff;
+  color: var(--duc-black);
+}
+
+/* 고려대 KUChat처럼 카드/여백 없이 브라우저 화면을 그대로 꽉 채우는 레이아웃.
+   헤더/본문/입력창은 각각 폭 100%로 펼치되, 안쪽 콘텐츠만 가운데 정렬된
+   최대 폭으로 감싸서 초광폭 모니터에서도 줄 길이가 너무 늘어지지 않게 합니다. */
+.page {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.header {
+  width: 100%;
+  padding: 18px 24px;
+  background: var(--duc-blue);
+  color: #fff;
+}
+
+.header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.header p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  opacity: 0.9;
+}
+
+.top-link-btn {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--duc-blue-tint);
+  color: var(--duc-blue-dark);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.top-link-btn:hover {
+  background: #d3edf7;
+}
+
+.card-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+.info-card {
+  flex: none;
+  width: 230px;
+  border: 1px solid #e4e6ea;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+}
+
+.info-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--duc-blue-dark);
+  margin-bottom: 6px;
+}
+
+.info-card-body {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--duc-gray);
+  white-space: pre-wrap;
+}
+
+.card-link-btn {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--duc-blue-dark);
+  text-decoration: underline;
+}
+
+.quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-reply-btn {
+  border: 1px solid var(--duc-blue);
+  color: var(--duc-blue-dark);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.quick-reply-btn:hover {
+  background: var(--duc-blue);
+  color: #fff;
+}
+
+.chat-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.chat-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bubble-row {
+  display: flex;
+}
+
+.bubble-row.user {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: min(78%, 560px);
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.bubble.assistant {
+  background: var(--duc-blue-tint);
+  border-bottom-left-radius: 4px;
+}
+
+.bubble.user {
+  background: var(--duc-blue);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+/* 봇이 보내는 카드/버튼 묶음 (인사말 말풍선 + 그 아래 카드/버튼들) */
+.bot-block {
+  max-width: min(88%, 640px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bot-block .bubble.assistant {
+  max-width: 100%;
+}
+
+.input-form {
+  width: 100%;
+  padding: 14px 24px 20px;
+  border-top: 1px solid #eee;
+}
+
+.input-form-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+}
+
+.input-form input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 14px;
+  outline: none;
+}
+
+.input-form input:focus {
+  border-color: var(--duc-blue);
+}
+
+.input-form button {
+  border: none;
+  background: var(--duc-blue);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.input-form button:hover:not(:disabled) {
+  background: var(--duc-blue-dark);
+}
+
+.input-form button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
