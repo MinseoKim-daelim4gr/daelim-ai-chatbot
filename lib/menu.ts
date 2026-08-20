@@ -939,6 +939,10 @@ export const MENU_NODES: Record<string, MenuNode> = {
         body: "복학원서 작성 → 학과(부)사무실에서 반 편성 및 전공 배정 → 교육행정팀에 복학원서 제출(복학신청)\n복학원서는 ① 공지 첨부파일(양식1) 출력, ② 대학본부 1층 비치, ③ 각 학과사무실 비치 중에서 받을 수 있어요.",
       },
     ],
+    quickReplies: [
+      { label: "복학 메뉴로", targetId: "return" },
+      { label: "처음으로", targetId: "root" },
+    ],
   },
   "return-industry": {
     id: "return-industry",
