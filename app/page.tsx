@@ -6,10 +6,15 @@ import type { MenuNode } from "@/lib/menu";
 type FaqMatch = { id: string; question: string };
 
 type Turn =
-  | { id: string; role: "user"; text: string }
-  | { id: string; role: "bot"; kind: "menu"; node: MenuNode }
-  | { id: string; role: "bot"; kind: "faq-suggest"; matches: FaqMatch[] }
-  | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean };
+  | { id: string; role: "user"; text: string; time: number }
+  | { id: string; role: "bot"; kind: "menu"; node: MenuNode; time: number }
+  | { id: string; role: "bot"; kind: "faq-suggest"; matches: FaqMatch[]; time: number }
+  | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean; time: number };
+
+// 메시지 전송 시각을 "오후 3:42" 형태로 표시
+function formatTime(ms: number) {
+  return new Date(ms).toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" });
+}
 
 export default function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -29,7 +34,7 @@ export default function Chat() {
     fetch("/api/menu?nodeId=root")
       .then((res) => res.json())
       .then((node: MenuNode) => {
-        setTurns([{ id: nextId(), role: "bot", kind: "menu", node }]);
+        setTurns([{ id: nextId(), role: "bot", kind: "menu", node, time: Date.now() }]);
       });
   }, []);
 
@@ -56,11 +61,11 @@ export default function Chat() {
   async function goTo(targetId: string, label: string) {
     if (busy) return;
     setBusy(true);
-    pushTurn({ id: nextId(), role: "user", text: label });
+    pushTurn({ id: nextId(), role: "user", text: label, time: Date.now() });
     try {
       const res = await fetch(`/api/menu?nodeId=${encodeURIComponent(targetId)}`);
       const node: MenuNode = await res.json();
-      pushTurn({ id: nextId(), role: "bot", kind: "menu", node });
+      pushTurn({ id: nextId(), role: "bot", kind: "menu", node, time: Date.now() });
     } finally {
       setBusy(false);
     }
@@ -77,7 +82,7 @@ export default function Chat() {
     if (!query || busy) return;
 
     setInput("");
-    pushTurn({ id: nextId(), role: "user", text: query });
+    pushTurn({ id: nextId(), role: "user", text: query, time: Date.now() });
     setBusy(true);
 
     try {
@@ -86,7 +91,7 @@ export default function Chat() {
       const matches: FaqMatch[] = data.matches || [];
 
       if (matches.length > 0) {
-        pushTurn({ id: nextId(), role: "bot", kind: "faq-suggest", matches });
+        pushTurn({ id: nextId(), role: "bot", kind: "faq-suggest", matches, time: Date.now() });
       } else if (data.blocked) {
         // 학사 관련 키워드가 하나도 없음 → Gemini를 아예 호출하지 않고 고정 문구만 표시
         pushTurn({
@@ -95,10 +100,11 @@ export default function Chat() {
           kind: "text",
           text: data.blockedMessage,
           streaming: false,
+          time: Date.now(),
         });
       } else {
         const botId = nextId();
-        pushTurn({ id: botId, role: "bot", kind: "text", text: "", streaming: true });
+        pushTurn({ id: botId, role: "bot", kind: "text", text: "", streaming: true, time: Date.now() });
         await streamGeminiReply(query, botId);
       }
     } finally {
@@ -197,7 +203,10 @@ function TurnView({
   if (turn.role === "user") {
     return (
       <div className="bubble-row user">
-        <div className="bubble user">{turn.text}</div>
+        <div className="bubble-col user">
+          <div className="bubble user">{turn.text}</div>
+          <span className="bubble-time">{formatTime(turn.time)}</span>
+        </div>
       </div>
     );
   }
@@ -209,6 +218,7 @@ function TurnView({
       <div className="bubble-row">
         <div className="bot-block">
           <div className="bubble assistant">{node.intro}</div>
+          <span className="bubble-time">{formatTime(turn.time)}</span>
 
           {node.topLink && (
             <a
@@ -276,6 +286,7 @@ function TurnView({
       <div className="bubble-row">
         <div className="bot-block">
           <div className="bubble assistant">🔎 이런 내용을 찾고 계신가요?</div>
+          <span className="bubble-time">{formatTime(turn.time)}</span>
           <div className="quick-replies">
             {turn.matches.map((m) => (
               <button
@@ -295,8 +306,11 @@ function TurnView({
   // ----- 봇: Gemini 자유 답변(안전망) -----
   return (
     <div className="bubble-row">
-      <div className="bubble assistant">
-        {turn.text || (turn.streaming ? "답변 작성 중..." : "")}
+      <div className="bubble-col">
+        <div className="bubble assistant">
+          {turn.text || (turn.streaming ? "답변 작성 중..." : "")}
+        </div>
+        <span className="bubble-time">{formatTime(turn.time)}</span>
       </div>
     </div>
   );
