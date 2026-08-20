@@ -4,10 +4,10 @@
    보조색상: DUC Silver / DUC Black / DUC Dark Brown / DUC Orange / DUC Green
    ========================================================================= */
 :root {
-  --duc-blue: #0095c8;
-  --duc-blue-dark: #007399;
-  --duc-blue-tint: #e6f5fb;
-  --duc-gray: #666666;
+  --duc-blue: #3d95ce;
+  --duc-blue-dark: #2973a3;
+  --duc-blue-tint: #ecf4fa;
+  --duc-gray: #4a4a4a;
   --duc-silver: #a7a9ac;
   --duc-black: #272425;
   --duc-orange: #f18308;
@@ -27,6 +27,8 @@ body {
   min-height: 100dvh;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
     "Malgun Gothic", sans-serif;
+  font-size: 18px;
+  line-height: 1.8;
   background: #fff;
   color: var(--duc-black);
 }
@@ -50,30 +52,181 @@ body {
 }
 
 .header-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  margin: 0 100px;
+}
+
+.header-top {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+
+.lang-btn.active {
+  color: #fff;
+}
+
+.lang-divider {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.header-spacer {
+  justify-self: end;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.help-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.help-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 유의사항/사용 방법 모달 */
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.help-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.help-modal-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: var(--duc-blue);
+  color: #fff;
+  border-radius: 16px 16px 0 0;
+}
+
+.help-modal-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.help-close-btn {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.help-modal-body {
+  padding: 18px 20px 22px;
+}
+
+.help-modal-body section + section {
+  margin-top: 18px;
+}
+
+.help-modal-body h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--duc-blue-dark);
+}
+
+.help-modal-body p {
+  margin: 0 0 6px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--duc-gray);
 }
 
 .header h1 {
   margin: 0;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 700;
+  text-align: center;
+  justify-self: center;
 }
 
-.header p {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  opacity: 0.9;
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 12px;
+  text-align: center;
+}
+
+.hero-img {
+  width: 128px;
+  height: auto;
+  margin-bottom: 14px;
+}
+
+.hero-greeting {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: left;
+  color: var(--duc-black);
+  margin-left: 5px;
 }
 
 .top-link-btn {
   display: inline-block;
   margin-bottom: 10px;
-  padding: 8px 14px;
+  padding: 12px 16px;
   border-radius: 8px;
   background: var(--duc-blue-tint);
   color: var(--duc-blue-dark);
-  font-size: 13px;
+  font-size: 15.5px;
   font-weight: 600;
   text-decoration: none;
 }
@@ -82,33 +235,32 @@ body {
   background: #d3edf7;
 }
 
+/* 항상 5열을 유지하고, 카드가 5개를 넘어가면 자동으로 다음 행으로 넘어감
+   (6~10개=2행, 11~15개=3행 …) */
 .card-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
   margin-bottom: 10px;
 }
 
 .info-card {
-  flex: none;
-  width: 230px;
   border: 1px solid #e4e6ea;
   border-radius: 10px;
-  padding: 12px;
-  background: #fff;
+  padding: 14px;
+  background: rgb(230, 238, 244);
 }
 
 .info-card-title {
-  font-size: 13px;
+  font-size: 15.5px;
   font-weight: 700;
   color: var(--duc-blue-dark);
   margin-bottom: 6px;
 }
 
 .info-card-body {
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.6;
   color: var(--duc-gray);
   white-space: pre-wrap;
 }
@@ -116,30 +268,150 @@ body {
 .card-link-btn {
   display: inline-block;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--duc-blue-dark);
   text-decoration: underline;
 }
 
 .quick-replies {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: thin;
+}
+
+.quick-replies-2 {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 240px;
+  gap: 8px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: thin;
+}
+
+.quick-replies-2 .quick-reply-btn {
+  width: 100%;
 }
 
 .quick-reply-btn {
+  flex: none;
   border: 1px solid var(--duc-blue);
   color: var(--duc-blue-dark);
   background: #fff;
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12.5px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
 }
 
 .quick-reply-btn:hover {
   background: var(--duc-blue);
   color: #fff;
+}
+
+.menu-grid-wrap {
+  width: 100%;
+}
+
+.menu-grid {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 30px) / 4);
+  gap: 10px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 2px 4px 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.menu-grid:active {
+  cursor: grabbing;
+}
+
+.menu-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.menu-nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.menu-nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--duc-blue-tint);
+  background: #fff;
+  color: var(--duc-blue-dark);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.menu-nav-btn:hover {
+  background: var(--duc-blue);
+  border-color: var(--duc-blue);
+  color: #fff;
+}
+
+.menu-grid-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 6px;
+  border: none;
+  border-radius: 16px;
+  background: var(--duc-blue-tint);
+  color: var(--duc-blue-dark);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.menu-grid-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+/* 마지막 페이지에 새 항목이 한 페이지(4열)보다 적게 남을 때, 뒤에 보이지 않는
+   빈 칸(필러)을 추가해서 열 개수를 4의 배수로 채워둠. 이렇게 하면 "다음" 버튼을
+   눌렀을 때 스크롤 가능한 폭이 충분해서 이미 봤던 앞쪽 버튼을 다시 끌어오지
+   않고(중복 방지), 남는 자리는 그냥 빈 공간으로 자연스럽게 남음 */
+.menu-grid-filler {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.menu-grid-btn:hover {
+  background: var(--duc-blue);
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 .chat-scroll {
@@ -149,8 +421,7 @@ body {
 }
 
 .chat-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  margin: 0 100px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -166,14 +437,16 @@ body {
 
 .bubble {
   max-width: min(78%, 560px);
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 16px;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
 .bubble.assistant {
+  width: 100%;
+  max-width: 100%;
   background: var(--duc-blue-tint);
   border-bottom-left-radius: 4px;
 }
@@ -184,7 +457,7 @@ body {
   border-bottom-right-radius: 4px;
 }
 
-/* 말풍선 + 전송 시각을 세로로 묶는 래퍼 (사용자 말풍선은 오른쪽 정렬) */
+/* 사용자 말풍선 + 전송 시각을 세로로 묶는 래퍼 (오른쪽 정렬, 말풍선과 같은 폭 제한) */
 .bubble-col {
   display: flex;
   flex-direction: column;
@@ -199,43 +472,199 @@ body {
   max-width: 100%;
 }
 
+/* Gemini 자유 답변 / 차단 안내처럼 bot-block 없이 단독으로 뜨는 봇 말풍선의 래퍼.
+   .bubble.assistant가 이미 폭 100%라서, 시각 표시 때문에 폭이 좁아지지 않도록
+   bubble-col과는 별도로 폭 제한 없이 세로로만 묶음 */
+.assistant-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .bubble-time {
   font-size: 11px;
   color: var(--duc-silver);
   margin: 3px 6px 0;
 }
 
-/* 봇이 보내는 카드/버튼 묶음 (인사말 말풍선 + 그 아래 카드/버튼들) */
+/* 답변 출처 배지: 학교 공식 자료 기반 답변인지, Gemini가 즉석에서 만든
+   AI 생성 답변인지 색으로 구분해서 보여줌 (학교 BI 보조색상인 초록/주황 사용) */
+.answer-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.answer-badge.official {
+  background: rgba(128, 189, 38, 0.15);
+  color: #567f18;
+}
+
+.answer-badge.ai {
+  background: rgba(241, 131, 8, 0.15);
+  color: #b8630a;
+}
+
+/* AI 생성 답변 아래에 매번 붙는 재확인 안내 문구 */
+.ai-disclaimer {
+  margin: 4px 6px 0;
+  font-size: 12.5px;
+  color: var(--duc-gray);
+}
+
+/* AI 응답 실패(구글 서버 과부하 등) 시 같은 질문을 바로 재시도할 수 있는 버튼 */
+.retry-btn {
+  align-self: flex-start;
+  margin-top: 6px;
+  border: 1px solid var(--duc-blue);
+  color: var(--duc-blue-dark);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retry-btn:hover:not(:disabled) {
+  background: var(--duc-blue);
+  color: #fff;
+}
+
+.retry-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.bubble.assistant.typing-bubble {
+  width: auto;
+  max-width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--duc-blue-dark);
+  opacity: 0.5;
+  animation: typing-bounce 1s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* 봇이 보내는 카드/버튼 묶음 (인사말 말풍선 + 그 아래 카드/버튼들)
+   입력창/전송 버튼과 같은 폭까지 꽉 채워서 오른쪽 끝을 맞춤 */
 .bot-block {
-  max-width: min(88%, 640px);
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.bot-block .bubble.assistant {
-  max-width: 100%;
-}
-
 .input-form {
+  position: relative;
   width: 100%;
   padding: 14px 24px 20px;
   border-top: 1px solid #eee;
 }
 
 .input-form-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  margin: 0 100px;
   display: flex;
   gap: 8px;
+}
+
+/* 고려대 KUChat처럼, 입력창에 타이핑하는 동안 관련 FAQ를 입력창 바로 위에
+   띄워서 Enter를 누르기 전에 미리 선택할 수 있게 해주는 추천 목록 */
+.suggest-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  background: #fff;
+  border-top: 1px solid #eee;
+  box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.08);
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.suggest-dropdown-inner {
+  margin: 0 100px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}
+
+/* .input-form button { ... } 규칙(파란 알약 버튼)이 이 버튼에도 적용되는 걸
+   막기 위해, 선택자 우선순위를 그보다 높여서 확실히 덮어씀
+   (send-btn에서도 같은 이유로 .input-form button.send-btn 형태를 씀) */
+.input-form button.suggest-item {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 12px 10px;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: inherit;
+  text-align: left;
+  color: var(--duc-black);
+  cursor: pointer;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.input-form button.suggest-item:last-child {
+  border-bottom: none;
+}
+
+/* 아래 ".input-form button:hover:not(:disabled)"(파란 진한 배경) 규칙과
+   우선순위(구체성)가 똑같아서, 파일에 더 늦게 나오는 그 규칙한테 밀려
+   마우스를 올렸을 때 진한 파란 배경 위에 검정 글씨가 겹쳐 안 보이던 문제가
+   있었음. .suggest-dropdown을 앞에 붙여 우선순위를 확실히 높여서, 챗봇 답변
+   말풍선과 같은 연한 배경(--duc-blue-tint)이 항상 이기게 함 */
+.input-form .suggest-dropdown button.suggest-item:hover {
+  background: var(--duc-blue-tint);
+  color: var(--duc-blue-dark);
 }
 
 .input-form input {
   flex: 1;
   border: 1px solid #ddd;
   border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 12px 18px;
+  font-size: 16px;
   outline: none;
 }
 
@@ -248,8 +677,9 @@ body {
   background: var(--duc-blue);
   color: #fff;
   border-radius: 999px;
-  padding: 0 18px;
-  font-size: 14px;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -260,4 +690,26 @@ body {
 .input-form button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.input-form button.send-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 화면이 좁으면 양옆 100px 여백이 콘텐츠를 다 밀어내버리니,
+   화면 폭이 충분히 넓을 때만 100px 여백을 주고 좁으면 원래 여백으로 되돌림 */
+@media (max-width: 700px) {
+  .header-inner,
+  .chat-inner,
+  .input-form-inner,
+  .suggest-dropdown-inner {
+    margin: 0 auto;
+    max-width: 960px;
+  }
 }
