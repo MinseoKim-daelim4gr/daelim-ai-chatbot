@@ -287,7 +287,7 @@ function TurnView({
             isRoot ? (
               <MenuGrid quickReplies={node.quickReplies} onGoTo={onGoTo} />
             ) : (
-              <div className="quick-replies">
+              <div className={node.id === "faq" ? "quick-replies-2" : "quick-replies"}>
                 {node.quickReplies.map((qr, i) => {
                   const label = qr.label;
                   const handleClick = () =>
@@ -408,7 +408,27 @@ function MenuGrid({
   function scrollByPage(direction: 1 | -1) {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollLeft += direction * el.clientWidth * 0.9;
+    const items = Array.from(el.querySelectorAll<HTMLElement>(".menu-grid-btn"));
+    if (items.length < 2) return;
+    // grid-auto-flow: column, 2행이라 짝수 인덱스가 각 열의 대표 아이템.
+    // 계산으로 이동 거리를 어림하면 소수점 반올림 때문에 열이 살짝 잘려 보여서,
+    // 실제 카드의 offsetLeft를 그대로 읽어와 정확히 그 위치로 맞춤
+    const columns = items.filter((_, i) => i % 2 === 0);
+    if (columns.length < 2) return;
+
+    const stride = columns[1].offsetLeft - columns[0].offsetLeft;
+    const visibleCount = Math.max(1, Math.round(el.clientWidth / stride));
+    // 남은 열이 한 페이지(visibleCount)보다 적을 때 그 자리에서 그대로 스크롤하면
+    // 브라우저가 끝까지 못 가게 막아서 맨 앞 열이 잘려 보이므로, 마지막에 보여줄 수
+    // 있는 가장 뒤쪽 시작 열로 상한을 둬서 항상 열이 통째로 보이게 함
+    const maxStartIndex = Math.max(0, columns.length - visibleCount);
+    const currentIndex = columns.findIndex((c) => c.offsetLeft >= el.scrollLeft - 1);
+    const fromIndex = currentIndex === -1 ? maxStartIndex : currentIndex;
+    const targetIndex = Math.max(
+      0,
+      Math.min(maxStartIndex, fromIndex + direction * visibleCount)
+    );
+    el.scrollLeft = columns[targetIndex].offsetLeft;
   }
 
   return (

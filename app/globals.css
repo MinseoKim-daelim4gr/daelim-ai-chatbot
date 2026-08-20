@@ -7,7 +7,7 @@
   --duc-blue: #3d95ce;
   --duc-blue-dark: #2973a3;
   --duc-blue-tint: #ecf4fa;
-  --duc-gray: #666666;
+  --duc-gray: #4a4a4a;
   --duc-silver: #a7a9ac;
   --duc-black: #272425;
   --duc-orange: #f18308;
@@ -27,6 +27,8 @@ body {
   min-height: 100dvh;
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
     "Malgun Gothic", sans-serif;
+  font-size: 18px;
+  line-height: 1.8;
   background: #fff;
   color: var(--duc-black);
 }
@@ -50,8 +52,7 @@ body {
 }
 
 .header-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  margin: 0 100px;
 }
 
 .header-top {
@@ -71,11 +72,11 @@ body {
 .lang-btn {
   background: none;
   border: none;
-  padding: 2px 3px;
+  padding: 4px;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
 }
 
@@ -84,7 +85,7 @@ body {
 }
 
 .lang-divider {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.4);
 }
 
@@ -94,17 +95,10 @@ body {
 
 .header h1 {
   margin: 0;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 700;
   text-align: center;
   justify-self: center;
-}
-
-.header p {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  opacity: 0.9;
-  text-align: center;
 }
 
 .hero {
@@ -123,21 +117,22 @@ body {
 
 .hero-greeting {
   margin: 0;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
-  line-height: 1.5;
+  line-height: 1.6;
   text-align: left;
   color: var(--duc-black);
+  margin-left: 5px;
 }
 
 .top-link-btn {
   display: inline-block;
   margin-bottom: 10px;
-  padding: 8px 14px;
+  padding: 12px 16px;
   border-radius: 8px;
   background: var(--duc-blue-tint);
   color: var(--duc-blue-dark);
-  font-size: 13px;
+  font-size: 15.5px;
   font-weight: 600;
   text-decoration: none;
 }
@@ -146,33 +141,32 @@ body {
   background: #d3edf7;
 }
 
+/* 항상 5열을 유지하고, 카드가 5개를 넘어가면 자동으로 다음 행으로 넘어감
+   (6~10개=2행, 11~15개=3행 …) */
 .card-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
   margin-bottom: 10px;
 }
 
 .info-card {
-  flex: none;
-  width: 230px;
   border: 1px solid #e4e6ea;
   border-radius: 10px;
-  padding: 12px;
-  background: #fff;
+  padding: 14px;
+  background: rgb(230, 238, 244);
 }
 
 .info-card-title {
-  font-size: 13px;
+  font-size: 15.5px;
   font-weight: 700;
   color: var(--duc-blue-dark);
   margin-bottom: 6px;
 }
 
 .info-card-body {
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.6;
   color: var(--duc-gray);
   white-space: pre-wrap;
 }
@@ -180,7 +174,7 @@ body {
 .card-link-btn {
   display: inline-block;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--duc-blue-dark);
   text-decoration: underline;
 }
@@ -195,14 +189,31 @@ body {
   scrollbar-width: thin;
 }
 
+.quick-replies-2 {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: 240px;
+  gap: 8px;
+  width: 100%;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: thin;
+}
+
+.quick-replies-2 .quick-reply-btn {
+  width: 100%;
+}
+
 .quick-reply-btn {
   flex: none;
   border: 1px solid var(--duc-blue);
   color: var(--duc-blue-dark);
   background: #fff;
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12.5px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -217,6 +228,7 @@ body {
 }
 
 .menu-grid {
+  position: relative;
   display: grid;
   grid-template-rows: repeat(2, 1fr);
   grid-auto-flow: column;
@@ -249,13 +261,13 @@ body {
 }
 
 .menu-nav-btn {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1px solid var(--duc-blue-tint);
   background: #fff;
   color: var(--duc-blue-dark);
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -274,22 +286,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 16px 6px;
+  gap: 8px;
+  padding: 18px 6px;
   border: none;
   border-radius: 16px;
   background: var(--duc-blue-tint);
   color: var(--duc-blue-dark);
   font-weight: 700;
-  font-size: 13px;
-  line-height: 1.3;
+  font-size: 15px;
+  line-height: 1.35;
   text-align: center;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .menu-grid-icon {
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1;
 }
 
@@ -306,8 +318,7 @@ body {
 }
 
 .chat-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  margin: 0 100px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -323,10 +334,10 @@ body {
 
 .bubble {
   max-width: min(78%, 560px);
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 16px;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
@@ -399,8 +410,7 @@ body {
 }
 
 .input-form-inner {
-  max-width: 960px;
-  margin: 0 auto;
+  margin: 0 100px;
   display: flex;
   gap: 8px;
 }
@@ -409,8 +419,8 @@ body {
   flex: 1;
   border: 1px solid #ddd;
   border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 14px;
+  padding: 12px 18px;
+  font-size: 16px;
   outline: none;
 }
 
@@ -423,8 +433,9 @@ body {
   background: var(--duc-blue);
   color: #fff;
   border-radius: 999px;
-  padding: 0 18px;
-  font-size: 14px;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -435,4 +446,15 @@ body {
 .input-form button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* 화면이 좁으면 양옆 100px 여백이 콘텐츠를 다 밀어내버리니,
+   화면 폭이 충분히 넓을 때만 100px 여백을 주고 좁으면 원래 여백으로 되돌림 */
+@media (max-width: 700px) {
+  .header-inner,
+  .chat-inner,
+  .input-form-inner {
+    margin: 0 auto;
+    max-width: 960px;
+  }
 }
