@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { MenuNode } from "@/lib/menu";
+import type { MenuNode, QuickReply } from "@/lib/menu";
 
 type FaqMatch = { id: string; question: string };
 
@@ -10,7 +10,14 @@ type Turn =
   | { id: string; role: "bot"; kind: "menu"; node: MenuNode }
   | { id: string; role: "bot"; kind: "faq-suggest"; matches: FaqMatch[] }
   | { id: string; role: "bot"; kind: "blocked"; message: string }
-  | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean };
+  | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean }
+  | { id: string; role: "bot"; kind: "loading" };
+
+const REPLY_DELAY_MIN_MS = 500;
+const REPLY_DELAY_MAX_MS = 1000;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const randomReplyDelay = () =>
+  REPLY_DELAY_MIN_MS + Math.random() * (REPLY_DELAY_MAX_MS - REPLY_DELAY_MIN_MS);
 
 export default function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -36,11 +43,15 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
   }, [turns]);
 
   function pushTurn(turn: Turn) {
     setTurns((prev) => [...prev, turn]);
+  }
+
+  function replaceTurn(id: string, turn: Turn) {
+    setTurns((prev) => prev.map((t) => (t.id === id ? turn : t)));
   }
 
   function updateTurnText(id: string, text: string, streaming: boolean) {
@@ -59,10 +70,15 @@ export default function Chat() {
     if (busy) return;
     setBusy(true);
     pushTurn({ id: nextId(), role: "user", text: label });
+    const loadingId = nextId();
+    pushTurn({ id: loadingId, role: "bot", kind: "loading" });
     try {
-      const res = await fetch(`/api/menu?nodeId=${encodeURIComponent(targetId)}`);
+      const [res] = await Promise.all([
+        fetch(`/api/menu?nodeId=${encodeURIComponent(targetId)}`),
+        wait(randomReplyDelay()),
+      ]);
       const node: MenuNode = await res.json();
-      pushTurn({ id: nextId(), role: "bot", kind: "menu", node });
+      replaceTurn(loadingId, { id: loadingId, role: "bot", kind: "menu", node });
     } finally {
       setBusy(false);
     }
@@ -155,14 +171,9 @@ export default function Chat() {
                 ENG
               </button>
             </div>
-            <h1>대웅Chat</h1>
+            <h1>디포레스트(DForest)</h1>
             <div className="header-spacer" />
           </div>
-          <p>
-            {lang === "ko"
-              ? "장학 · 등록 · 수강신청 · 성적 · 교내 연락처 안내"
-              : "Scholarships · Enrollment · Course Registration · Grades · Campus Contacts"}
-          </p>
         </div>
       </header>
 
@@ -175,7 +186,7 @@ export default function Chat() {
               <br />
               저는 대웅이에요
               <br />
-              무엇을 도와드릴까요
+              무엇을 도와드릴까요?
             </p>
           </div>
 
@@ -273,15 +284,16 @@ function TurnView({
           )}
 
           {node.quickReplies && node.quickReplies.length > 0 && (
-            <div className={isRoot ? "menu-grid" : "quick-replies"}>
-              {node.quickReplies.map((qr, i) => {
-                const label = qr.label;
-                const handleClick = () =>
-                  "targetId" in qr && qr.targetId
-                    ? onGoTo(qr.targetId, label)
-                    : onGoTo(qr.askText!, label);
-
-                if (!isRoot) {
+            isRoot ? (
+              <MenuGrid quickReplies={node.quickReplies} onGoTo={onGoTo} />
+            ) : (
+              <div className="quick-replies">
+                {node.quickReplies.map((qr, i) => {
+                  const label = qr.label;
+                  const handleClick = () =>
+                    "targetId" in qr && qr.targetId
+                      ? onGoTo(qr.targetId, label)
+                      : onGoTo(qr.askText!, label);
                   return (
                     <button
                       key={i}
@@ -291,24 +303,9 @@ function TurnView({
                       {label}
                     </button>
                   );
-                }
-
-                const [icon, ...rest] = label.split(" ");
-                const text = rest.length ? rest.join(" ") : icon;
-                return (
-                  <button
-                    key={i}
-                    className="menu-grid-btn"
-                    onClick={handleClick}
-                  >
-                    {rest.length > 0 && (
-                      <span className="menu-grid-icon">{icon}</span>
-                    )}
-                    <span className="menu-grid-label">{text}</span>
-                  </button>
-                );
-              })}
-            </div>
+                })}
+              </div>
+            )
           )}
         </div>
       </div>
@@ -337,6 +334,19 @@ function TurnView({
     );
   }
 
+  // ----- 봇: 메뉴/버튼 응답 대기 중 (전송 중 표시) -----
+  if (turn.kind === "loading") {
+    return (
+      <div className="bubble-row">
+        <div className="bubble assistant typing-bubble">
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+        </div>
+      </div>
+    );
+  }
+
   // ----- 봇: 학사 범위 밖 질문 차단 (예: 날씨, 잡담) -----
   if (turn.kind === "blocked") {
     return (
@@ -351,6 +361,104 @@ function TurnView({
     <div className="bubble-row">
       <div className="bubble assistant">
         {turn.text || (turn.streaming ? "답변 작성 중..." : "")}
+      </div>
+    </div>
+  );
+}
+
+// 첫 화면 메인 메뉴: 2행 그리드로 배치하고 다 못 담으면 옆으로 스크롤.
+// ① 아래 화살표 버튼 클릭으로 한 화면씩 넘기기 ② 박스를 마우스로 누른 채
+// 옆으로 드래그해도 스크롤되는 두 가지 방법을 모두 지원함
+function MenuGrid({
+  quickReplies,
+  onGoTo,
+}: {
+  quickReplies: QuickReply[];
+  onGoTo: (targetId: string, label: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({ down: false, moved: false, startX: 0, startScrollLeft: 0 });
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el) return;
+    drag.current = { down: true, moved: false, startX: e.clientX, startScrollLeft: el.scrollLeft };
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el || !drag.current.down) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 3) drag.current.moved = true;
+    el.scrollLeft = drag.current.startScrollLeft - dx;
+  }
+
+  function handlePointerUp() {
+    drag.current.down = false;
+  }
+
+  function handleItemClick(action: () => void) {
+    if (drag.current.moved) {
+      drag.current.moved = false;
+      return;
+    }
+    action();
+  }
+
+  function scrollByPage(direction: 1 | -1) {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollLeft += direction * el.clientWidth * 0.9;
+  }
+
+  return (
+    <div className="menu-grid-wrap">
+      <div
+        className="menu-grid"
+        ref={scrollRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
+        {quickReplies.map((qr, i) => {
+          const label = qr.label;
+          const handleClick = () =>
+            "targetId" in qr && qr.targetId
+              ? onGoTo(qr.targetId, label)
+              : onGoTo(qr.askText!, label);
+          const [icon, ...rest] = label.split(" ");
+          const text = rest.length ? rest.join(" ") : icon;
+          return (
+            <button
+              key={i}
+              className="menu-grid-btn"
+              onClick={() => handleItemClick(handleClick)}
+            >
+              {rest.length > 0 && <span className="menu-grid-icon">{icon}</span>}
+              <span className="menu-grid-label">{text}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="menu-nav">
+        <button
+          type="button"
+          className="menu-nav-btn"
+          aria-label="이전"
+          onClick={() => scrollByPage(-1)}
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          className="menu-nav-btn"
+          aria-label="다음"
+          onClick={() => scrollByPage(1)}
+        >
+          ›
+        </button>
       </div>
     </div>
   );
