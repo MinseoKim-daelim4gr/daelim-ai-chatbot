@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { MenuNode } from "@/lib/menu";
+import type { MenuNode, QuickReply } from "@/lib/menu";
 
 type FaqMatch = { id: string; question: string };
 
@@ -9,7 +9,15 @@ type Turn =
   | { id: string; role: "user"; text: string; time: number }
   | { id: string; role: "bot"; kind: "menu"; node: MenuNode; time: number }
   | { id: string; role: "bot"; kind: "faq-suggest"; matches: FaqMatch[]; time: number }
-  | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean; time: number };
+  | { id: string; role: "bot"; kind: "blocked"; message: string; time: number }
+  | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean; time: number }
+  | { id: string; role: "bot"; kind: "loading" };
+
+const REPLY_DELAY_MIN_MS = 500;
+const REPLY_DELAY_MAX_MS = 1000;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const randomReplyDelay = () =>
+  REPLY_DELAY_MIN_MS + Math.random() * (REPLY_DELAY_MAX_MS - REPLY_DELAY_MIN_MS);
 
 // 메시지 전송 시각을 "오후 3:42" 형태로 표시
 function formatTime(ms: number) {
@@ -20,6 +28,7 @@ export default function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [lang, setLang] = useState<"ko" | "en">("ko");
 
   const idRef = useRef(0);
   const nextId = () => `t${++idRef.current}`;
@@ -39,11 +48,15 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
   }, [turns]);
 
   function pushTurn(turn: Turn) {
     setTurns((prev) => [...prev, turn]);
+  }
+
+  function replaceTurn(id: string, turn: Turn) {
+    setTurns((prev) => prev.map((t) => (t.id === id ? turn : t)));
   }
 
   function updateTurnText(id: string, text: string, streaming: boolean) {
@@ -62,10 +75,15 @@ export default function Chat() {
     if (busy) return;
     setBusy(true);
     pushTurn({ id: nextId(), role: "user", text: label, time: Date.now() });
+    const loadingId = nextId();
+    pushTurn({ id: loadingId, role: "bot", kind: "loading" });
     try {
-      const res = await fetch(`/api/menu?nodeId=${encodeURIComponent(targetId)}`);
+      const [res] = await Promise.all([
+        fetch(`/api/menu?nodeId=${encodeURIComponent(targetId)}`),
+        wait(randomReplyDelay()),
+      ]);
       const node: MenuNode = await res.json();
-      pushTurn({ id: nextId(), role: "bot", kind: "menu", node, time: Date.now() });
+      replaceTurn(loadingId, { id: loadingId, role: "bot", kind: "menu", node, time: Date.now() });
     } finally {
       setBusy(false);
     }
@@ -75,8 +93,7 @@ export default function Chat() {
     goTo(`faq-${id}`, label);
   }
 
-  // 직접 입력한 질문 → ① 키워드 FAQ → ② 학사 관련 키워드가 하나도 없으면
-  // 차단(Gemini 미호출) → ③ Gemini 자유 답변(안전망)
+  // 직접 입력한 질문 → ① 키워드 FAQ → ② 학사 범위 밖 질문 차단 → ③ Gemini 자유 답변(안전망)
   async function submitQuery(text: string) {
     const query = text.trim();
     if (!query || busy) return;
@@ -93,13 +110,11 @@ export default function Chat() {
       if (matches.length > 0) {
         pushTurn({ id: nextId(), role: "bot", kind: "faq-suggest", matches, time: Date.now() });
       } else if (data.blocked) {
-        // 학사 관련 키워드가 하나도 없음 → Gemini를 아예 호출하지 않고 고정 문구만 표시
         pushTurn({
           id: nextId(),
           role: "bot",
-          kind: "text",
-          text: data.blockedMessage,
-          streaming: false,
+          kind: "blocked",
+          message: data.blockedMessage,
           time: Date.now(),
         });
       } else {
@@ -149,13 +164,43 @@ export default function Chat() {
     <div className="page">
       <header className="header">
         <div className="header-inner">
-          <h1>대림대학교 AI 챗봇</h1>
-          <p>장학 · 등록 · 수강신청 · 성적 · 교내 연락처 안내</p>
+          <div className="header-top">
+            <div className="lang-toggle">
+              <button
+                type="button"
+                className={`lang-btn ${lang === "ko" ? "active" : ""}`}
+                onClick={() => setLang("ko")}
+              >
+                KOR
+              </button>
+              <span className="lang-divider">|</span>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "en" ? "active" : ""}`}
+                onClick={() => setLang("en")}
+              >
+                ENG
+              </button>
+            </div>
+            <h1>디포레스트(DForest)</h1>
+            <div className="header-spacer" />
+          </div>
         </div>
       </header>
 
       <div className="chat-scroll">
         <div className="chat-inner">
+          <div className="hero">
+            <img src="/daewoong.png" alt="대웅이" className="hero-img" />
+            <p className="hero-greeting">
+              안녕하세요?
+              <br />
+              저는 대웅이에요
+              <br />
+              무엇을 도와드릴까요?
+            </p>
+          </div>
+
           {turns.map((turn) => (
             <TurnView
               key={turn.id}
@@ -214,10 +259,11 @@ function TurnView({
   // ----- 봇: 버튼 메뉴 / FAQ 답변 화면 -----
   if (turn.kind === "menu") {
     const node = turn.node;
+    const isRoot = node.id === "root";
     return (
       <div className="bubble-row">
         <div className="bot-block">
-          <div className="bubble assistant">{node.intro}</div>
+          {!isRoot && <div className="bubble assistant">{node.intro}</div>}
 
           {node.topLink && (
             <a
@@ -252,27 +298,28 @@ function TurnView({
           )}
 
           {node.quickReplies && node.quickReplies.length > 0 && (
-            <div className="quick-replies">
-              {node.quickReplies.map((qr, i) =>
-                "targetId" in qr && qr.targetId ? (
-                  <button
-                    key={i}
-                    className="quick-reply-btn"
-                    onClick={() => onGoTo(qr.targetId!, qr.label)}
-                  >
-                    {qr.label}
-                  </button>
-                ) : (
-                  <button
-                    key={i}
-                    className="quick-reply-btn"
-                    onClick={() => onGoTo(qr.askText!, qr.label)}
-                  >
-                    {qr.label}
-                  </button>
-                )
-              )}
-            </div>
+            isRoot ? (
+              <MenuGrid quickReplies={node.quickReplies} onGoTo={onGoTo} />
+            ) : (
+              <div className={node.id === "faq" ? "quick-replies-2" : "quick-replies"}>
+                {node.quickReplies.map((qr, i) => {
+                  const label = qr.label;
+                  const handleClick = () =>
+                    "targetId" in qr && qr.targetId
+                      ? onGoTo(qr.targetId, label)
+                      : onGoTo(qr.askText!, label);
+                  return (
+                    <button
+                      key={i}
+                      className="quick-reply-btn"
+                      onClick={handleClick}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )
           )}
           <span className="bubble-time">{formatTime(turn.time)}</span>
         </div>
@@ -303,14 +350,155 @@ function TurnView({
     );
   }
 
+  // ----- 봇: 메뉴/버튼 응답 대기 중 (전송 중 표시) -----
+  if (turn.kind === "loading") {
+    return (
+      <div className="bubble-row">
+        <div className="bubble assistant typing-bubble">
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+        </div>
+      </div>
+    );
+  }
+
+  // ----- 봇: 학사 범위 밖 질문 차단 (예: 날씨, 잡담) -----
+  if (turn.kind === "blocked") {
+    return (
+      <div className="bubble-row">
+        <div className="assistant-block">
+          <div className="bubble assistant">{turn.message}</div>
+          <span className="bubble-time">{formatTime(turn.time)}</span>
+        </div>
+      </div>
+    );
+  }
+
   // ----- 봇: Gemini 자유 답변(안전망) -----
   return (
     <div className="bubble-row">
-      <div className="bubble-col">
+      <div className="assistant-block">
         <div className="bubble assistant">
           {turn.text || (turn.streaming ? "답변 작성 중..." : "")}
         </div>
         <span className="bubble-time">{formatTime(turn.time)}</span>
+      </div>
+    </div>
+  );
+}
+
+// 첫 화면 메인 메뉴: 2행 그리드로 배치하고 다 못 담으면 옆으로 스크롤.
+// ① 아래 화살표 버튼 클릭으로 한 화면씩 넘기기 ② 박스를 마우스로 누른 채
+// 옆으로 드래그해도 스크롤되는 두 가지 방법을 모두 지원함
+function MenuGrid({
+  quickReplies,
+  onGoTo,
+}: {
+  quickReplies: QuickReply[];
+  onGoTo: (targetId: string, label: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({ down: false, moved: false, startX: 0, startScrollLeft: 0 });
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el) return;
+    drag.current = { down: true, moved: false, startX: e.clientX, startScrollLeft: el.scrollLeft };
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el || !drag.current.down) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 3) drag.current.moved = true;
+    el.scrollLeft = drag.current.startScrollLeft - dx;
+  }
+
+  function handlePointerUp() {
+    drag.current.down = false;
+  }
+
+  function handleItemClick(action: () => void) {
+    if (drag.current.moved) {
+      drag.current.moved = false;
+      return;
+    }
+    action();
+  }
+
+  function scrollByPage(direction: 1 | -1) {
+    const el = scrollRef.current;
+    if (!el) return;
+    const items = Array.from(el.querySelectorAll<HTMLElement>(".menu-grid-btn"));
+    if (items.length < 2) return;
+    // grid-auto-flow: column, 2행이라 짝수 인덱스가 각 열의 대표 아이템.
+    // 계산으로 이동 거리를 어림하면 소수점 반올림 때문에 열이 살짝 잘려 보여서,
+    // 실제 카드의 offsetLeft를 그대로 읽어와 정확히 그 위치로 맞춤
+    const columns = items.filter((_, i) => i % 2 === 0);
+    if (columns.length < 2) return;
+    const stride = columns[1].offsetLeft - columns[0].offsetLeft;
+    const visibleCount = Math.max(1, Math.round(el.clientWidth / stride));
+    // 남은 열이 한 페이지(visibleCount)보다 적을 때 그 자리에서 그대로 스크롤하면
+    // 브라우저가 끝까지 못 가게 막아서 맨 앞 열이 잘려 보이므로, 마지막에 보여줄 수
+    // 있는 가장 뒤쪽 시작 열로 상한을 둬서 항상 열이 통째로 보이게 함
+    const maxStartIndex = Math.max(0, columns.length - visibleCount);
+    const currentIndex = columns.findIndex((c) => c.offsetLeft >= el.scrollLeft - 1);
+    const fromIndex = currentIndex === -1 ? maxStartIndex : currentIndex;
+    const targetIndex = Math.max(
+      0,
+      Math.min(maxStartIndex, fromIndex + direction * visibleCount)
+    );
+    el.scrollLeft = columns[targetIndex].offsetLeft;
+  }
+
+  return (
+    <div className="menu-grid-wrap">
+      <div
+        className="menu-grid"
+        ref={scrollRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
+        {quickReplies.map((qr, i) => {
+          const label = qr.label;
+          const handleClick = () =>
+            "targetId" in qr && qr.targetId
+              ? onGoTo(qr.targetId, label)
+              : onGoTo(qr.askText!, label);
+          const [icon, ...rest] = label.split(" ");
+          const text = rest.length ? rest.join(" ") : icon;
+          return (
+            <button
+              key={i}
+              className="menu-grid-btn"
+              onClick={() => handleItemClick(handleClick)}
+            >
+              {rest.length > 0 && <span className="menu-grid-icon">{icon}</span>}
+              <span className="menu-grid-label">{text}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="menu-nav">
+        <button
+          type="button"
+          className="menu-nav-btn"
+          aria-label="이전"
+          onClick={() => scrollByPage(-1)}
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          className="menu-nav-btn"
+          aria-label="다음"
+          onClick={() => scrollByPage(1)}
+        >
+          ›
+        </button>
       </div>
     </div>
   );
