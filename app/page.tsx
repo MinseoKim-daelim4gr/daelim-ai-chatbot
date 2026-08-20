@@ -9,12 +9,14 @@ type Turn =
   | { id: string; role: "user"; text: string }
   | { id: string; role: "bot"; kind: "menu"; node: MenuNode }
   | { id: string; role: "bot"; kind: "faq-suggest"; matches: FaqMatch[] }
+  | { id: string; role: "bot"; kind: "blocked"; message: string }
   | { id: string; role: "bot"; kind: "text"; text: string; streaming: boolean };
 
 export default function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [lang, setLang] = useState<"ko" | "en">("ko");
 
   const idRef = useRef(0);
   const nextId = () => `t${++idRef.current}`;
@@ -70,8 +72,7 @@ export default function Chat() {
     goTo(`faq-${id}`, label);
   }
 
-  // 직접 입력한 질문 → ① 키워드 FAQ → ② 학사 관련 키워드가 하나도 없으면
-  // 차단(Gemini 미호출) → ③ Gemini 자유 답변(안전망)
+  // 직접 입력한 질문 → ① 키워드 FAQ → ② 학사 범위 밖 질문 차단 → ③ Gemini 자유 답변(안전망)
   async function submitQuery(text: string) {
     const query = text.trim();
     if (!query || busy) return;
@@ -88,14 +89,7 @@ export default function Chat() {
       if (matches.length > 0) {
         pushTurn({ id: nextId(), role: "bot", kind: "faq-suggest", matches });
       } else if (data.blocked) {
-        // 학사 관련 키워드가 하나도 없음 → Gemini를 아예 호출하지 않고 고정 문구만 표시
-        pushTurn({
-          id: nextId(),
-          role: "bot",
-          kind: "text",
-          text: data.blockedMessage,
-          streaming: false,
-        });
+        pushTurn({ id: nextId(), role: "bot", kind: "blocked", message: data.blockedMessage });
       } else {
         const botId = nextId();
         pushTurn({ id: botId, role: "bot", kind: "text", text: "", streaming: true });
@@ -143,13 +137,48 @@ export default function Chat() {
     <div className="page">
       <header className="header">
         <div className="header-inner">
-          <h1>대림대학교 AI 챗봇</h1>
-          <p>장학 · 등록 · 수강신청 · 성적 · 교내 연락처 안내</p>
+          <div className="header-top">
+            <div className="lang-toggle">
+              <button
+                type="button"
+                className={`lang-btn ${lang === "ko" ? "active" : ""}`}
+                onClick={() => setLang("ko")}
+              >
+                KOR
+              </button>
+              <span className="lang-divider">|</span>
+              <button
+                type="button"
+                className={`lang-btn ${lang === "en" ? "active" : ""}`}
+                onClick={() => setLang("en")}
+              >
+                ENG
+              </button>
+            </div>
+            <h1>대웅Chat</h1>
+            <div className="header-spacer" />
+          </div>
+          <p>
+            {lang === "ko"
+              ? "장학 · 등록 · 수강신청 · 성적 · 교내 연락처 안내"
+              : "Scholarships · Enrollment · Course Registration · Grades · Campus Contacts"}
+          </p>
         </div>
       </header>
 
       <div className="chat-scroll">
         <div className="chat-inner">
+          <div className="hero">
+            <img src="/daewoong.png" alt="대웅이" className="hero-img" />
+            <p className="hero-greeting">
+              안녕하세요?
+              <br />
+              저는 대웅이에요
+              <br />
+              무엇을 도와드릴까요
+            </p>
+          </div>
+
           {turns.map((turn) => (
             <TurnView
               key={turn.id}
@@ -205,10 +234,11 @@ function TurnView({
   // ----- 봇: 버튼 메뉴 / FAQ 답변 화면 -----
   if (turn.kind === "menu") {
     const node = turn.node;
+    const isRoot = node.id === "root";
     return (
       <div className="bubble-row">
         <div className="bot-block">
-          <div className="bubble assistant">{node.intro}</div>
+          {!isRoot && <div className="bubble assistant">{node.intro}</div>}
 
           {node.topLink && (
             <a
@@ -243,26 +273,41 @@ function TurnView({
           )}
 
           {node.quickReplies && node.quickReplies.length > 0 && (
-            <div className="quick-replies">
-              {node.quickReplies.map((qr, i) =>
-                "targetId" in qr && qr.targetId ? (
+            <div className={isRoot ? "menu-grid" : "quick-replies"}>
+              {node.quickReplies.map((qr, i) => {
+                const label = qr.label;
+                const handleClick = () =>
+                  "targetId" in qr && qr.targetId
+                    ? onGoTo(qr.targetId, label)
+                    : onGoTo(qr.askText!, label);
+
+                if (!isRoot) {
+                  return (
+                    <button
+                      key={i}
+                      className="quick-reply-btn"
+                      onClick={handleClick}
+                    >
+                      {label}
+                    </button>
+                  );
+                }
+
+                const [icon, ...rest] = label.split(" ");
+                const text = rest.length ? rest.join(" ") : icon;
+                return (
                   <button
                     key={i}
-                    className="quick-reply-btn"
-                    onClick={() => onGoTo(qr.targetId!, qr.label)}
+                    className="menu-grid-btn"
+                    onClick={handleClick}
                   >
-                    {qr.label}
+                    {rest.length > 0 && (
+                      <span className="menu-grid-icon">{icon}</span>
+                    )}
+                    <span className="menu-grid-label">{text}</span>
                   </button>
-                ) : (
-                  <button
-                    key={i}
-                    className="quick-reply-btn"
-                    onClick={() => onGoTo(qr.askText!, qr.label)}
-                  >
-                    {qr.label}
-                  </button>
-                )
-              )}
+                );
+              })}
             </div>
           )}
         </div>
@@ -288,6 +333,15 @@ function TurnView({
             ))}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // ----- 봇: 학사 범위 밖 질문 차단 (예: 날씨, 잡담) -----
+  if (turn.kind === "blocked") {
+    return (
+      <div className="bubble-row">
+        <div className="bubble assistant">{turn.message}</div>
       </div>
     );
   }
