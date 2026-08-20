@@ -218,7 +218,6 @@ function TurnView({
       <div className="bubble-row">
         <div className="bot-block">
           <div className="bubble assistant">{node.intro}</div>
-          <span className="bubble-time">{formatTime(turn.time)}</span>
 
           {node.topLink && (
             <a
@@ -275,6 +274,7 @@ function TurnView({
               )}
             </div>
           )}
+          <span className="bubble-time">{formatTime(turn.time)}</span>
         </div>
       </div>
     );
@@ -286,7 +286,6 @@ function TurnView({
       <div className="bubble-row">
         <div className="bot-block">
           <div className="bubble assistant">🔎 이런 내용을 찾고 계신가요?</div>
-          <span className="bubble-time">{formatTime(turn.time)}</span>
           <div className="quick-replies">
             {turn.matches.map((m) => (
               <button
@@ -298,6 +297,7 @@ function TurnView({
               </button>
             ))}
           </div>
+          <span className="bubble-time">{formatTime(turn.time)}</span>
         </div>
       </div>
     );
