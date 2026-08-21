@@ -1,0 +1,640 @@
+<title>교양시간표 찾기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2f7f8;
+    --surface: #ffffff;
+    --surface-alt: #eaf5f9;
+    --surface-sunken: #e4eef1;
+    --text: #08080c;
+    --text-muted: #717171;
+    --text-faint: #a6aaae;
+    --border: #d7dfe8;
+    --border-strong: #b9c5d1;
+    --accent: #00a6dd;
+    --accent-dark: #20708a;
+    --accent-tint: #e3f3f8;
+    --accent-contrast: #ffffff;
+    --tag-night: #b96b09;
+    --tag-night-bg: #fbefe0;
+    --tag-elective: #618f1f;
+    --tag-elective-bg: #edf5e2;
+    --tag-common: #00a6dd;
+    --tag-common-bg: #e3f3f8;
+    --shadow: 0 1px 2px rgba(8,8,12,0.05), 0 8px 24px -12px rgba(8,8,12,0.18);
+    --radius: 14px;
+    --font-display: 'IBM Plex Sans KR', 'Pretendard', -apple-system, sans-serif;
+    --font-body: 'IBM Plex Sans KR', 'Pretendard', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'IBM Plex Sans KR', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--accent-tint); color: var(--accent-dark); }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  header.page-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .brand .mark {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: var(--accent-tint);
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin: 4px 0 0;
+  }
+
+  nav.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  nav.tabs button {
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    padding: 10px 4px 12px;
+    margin-right: 18px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transform: translateY(1px);
+  }
+  nav.tabs button.active {
+    color: var(--accent-dark);
+    border-bottom-color: var(--accent);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+
+  .card h2 {
+    font-family: var(--font-display);
+    font-size: 15.5px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .card .hint {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0 0 14px;
+  }
+
+  .dept-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .dept-btn {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 10px;
+    cursor: pointer;
+    text-align: center;
+  }
+  .dept-btn:hover { border-color: var(--accent); }
+  .dept-btn.selected { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-dark); }
+
+  .section-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .section-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 14px 8px 8px;
+    cursor: pointer;
+  }
+  .section-btn:hover { border-color: var(--accent); }
+  .section-btn.selected { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-dark); }
+  .section-btn .section-day {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-contrast);
+    background: var(--accent);
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .section-btn.selected .section-day { background: var(--accent-dark); }
+
+  .section-confirm {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 30px 0 -10px;
+  }
+
+  .empty-state {
+    color: var(--text-faint);
+    font-size: 13.5px;
+    padding: 10px 2px;
+  }
+
+  .day-view-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 30px 0 10px;
+  }
+  .day-view-title .day-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .day-view-title .day-note {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  table.board {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  table.board caption {
+    text-align: left;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    padding-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+  table.board th {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1.5px solid var(--border-strong);
+    background: var(--surface-sunken);
+    position: sticky;
+    top: 0;
+  }
+  table.board th:first-child { border-top-left-radius: 8px; }
+  table.board th:last-child { border-top-right-radius: 8px; }
+  table.board td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.board tr:last-child td { border-bottom: none; }
+  table.board tr.night-row td { background: var(--tag-night-bg); }
+  .period-cell {
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    color: var(--text-muted);
+  }
+  .period-cell .pnum {
+    display: inline-block;
+    min-width: 18px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .room-code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    padding: 1px 6px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 3px;
+    white-space: nowrap;
+  }
+  .course-text {
+    white-space: pre-line;
+    color: var(--text);
+  }
+  .course-cell { margin-bottom: 8px; }
+  .course-cell:last-child { margin-bottom: 0; }
+  .badge-tag {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 5px;
+    margin-right: 6px;
+    display: inline-block;
+  }
+  .badge-tag.common { color: var(--tag-common); background: var(--tag-common-bg); }
+  .badge-tag.elective { color: var(--tag-elective); background: var(--tag-elective-bg); }
+
+  .table-scroll { overflow-x: auto; border-radius: 8px; }
+
+  #associateDayView:not(:empty), #majorDayView:not(:empty) { margin-bottom: 18px; }
+
+  .dept-note {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 14px 0 0;
+  }
+  .dept-note b { color: var(--text); }
+
+  .special-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .special-days button {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .special-days button:hover { border-color: var(--accent); }
+  .special-days button.selected { border-color: var(--accent); background: var(--accent-tint); color: var(--accent-dark); }
+
+  .group-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 14px 0 4px;
+  }
+  @media (max-width: 640px) { .group-grid { grid-template-columns: 1fr; } }
+  .group-card {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .group-card .g-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-dark);
+    margin-bottom: 6px;
+  }
+  .group-card .g-body {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  footer.foot {
+    margin-top: 26px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12.5px;
+    color: var(--text-faint);
+    line-height: 1.7;
+  }
+
+  a { color: var(--accent-dark); }
+</style>
+
+<div class="wrap">
+  <header class="page-head">
+    <div class="brand">
+      <div>
+        <h1>교양시간표 찾기</h1>
+        <p class="subtitle">대림대학교 2026학년도 2학기 교양과목 시간표 · 학과 검색</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="associate" class="active">전문학사 · 산업체위탁</button>
+    <button data-tab="major">학사학위 전공심화</button>
+  </nav>
+
+  <section class="panel active" id="panel-associate">
+    <div class="card">
+      <h2>학과로 선택하기</h2>
+      <p class="hint">1학년 중점교양은 학과·분반마다 요일이 달라요. 본인 학과를 눌러보세요.</p>
+      <div class="dept-buttons" id="deptButtons"></div>
+    </div>
+
+    <div class="card" id="sectionCard" hidden>
+      <h2>내 반 선택하기</h2>
+      <p class="hint" id="sectionHint"></p>
+      <div class="section-buttons" id="sectionButtons"></div>
+    </div>
+
+    <div id="associateDayView"></div>
+
+    <div class="card">
+      <h2>중점교양 외 다른 시간표</h2>
+      <p class="hint">아래 세 가지는 특정 프로그램 전용이라 학과 검색 없이 바로 볼 수 있어요.</p>
+      <div class="special-days" id="specialDays"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-major">
+    <div class="card">
+      <h2>학사학위 전공심화 · 토요일</h2>
+      <p class="hint">전공심화 과정은 학과와 무관하게 전원 토요일에 수업이 있고, 시간대별 내용도 모두 같아요. 아래 표를 바로 확인하세요.</p>
+      <div class="group-grid">
+        <div class="group-card">
+          <div class="g-title">그룹 1 · 283명 (4학년)</div>
+          <div class="g-body">건축공학과 · 메카트로닉스공학과(1년) · 미래자동차공학과 · 바이오헬스케어학과(1년) · 반도체학과(1년) · 방송음향영상학과 · 보건의료행정학과 · 소방안전설비공학과 · 스마트소프트웨어학과 · 스포츠지도학과(1년) · 실내디자인학과 · 언어치료학과 · 유아교육과(1년) · 전자통신AI공학과 (각 4-1반)</div>
+        </div>
+        <div class="group-card">
+          <div class="g-title">그룹 2 · 139명 (3학년)</div>
+          <div class="g-body">건설환경공학과 · 경영학과 · 기계공학과 · 문헌정보학과(2년) · 사무행정학과(2년) · 사회복지학과 · 전기공학과 · 제과제빵과 · 항공서비스학과 (각 3-1반)</div>
+        </div>
+      </div>
+      <p class="dept-note">두 그룹 모두 <b>같은 시간·같은 강의</b>를 듣고, 강의실(J0213 / J0214)만 나뉘어요. 정확히 어느 강의실인지는 학생포털 시간표에서 확인해주세요.</p>
+    </div>
+    <div id="majorDayView"></div>
+  </section>
+
+  <footer class="foot">
+    ※ 이 페이지는 학교에서 배포한 교양시간표 원본 파일을 그대로 옮긴 참고용 도구예요. 정확한 개인 시간표(정확한 강의실 배정 등)는 반드시 학생포털에서 다시 확인해주세요.
+  </footer>
+</div>
+
+<script type="application/json" id="tt-data">{"associate": {"days": [{"day": "월", "deptBlob": "중점교양 1~8 (603)\n미래자동차공학부 1-1,2,3,4(144) / 영상디자인과 1-1,2(80) / 반도체학과(반도체디자인전공(23) 1-1/ 반도체장비전공(23) 1-2,3)(100)\n소프트웨어학부 1-1,2,3(111) / 사무행정학과 1-1,2(66) / 건축과(건축디자인전공(22) 1-1,2 건축엔지니어링전공(22) 1-3)(102)", "day_periods": [{"period": "1~2", "time": "09:00~10:50", "entries": [{"room": "J0212", "text": "커뮤니케이션\n01-노경호"}, {"room": "E0410", "text": "AI와사회변화\n01-정한열"}, {"room": "E0111", "text": "AI와사회변화\n02-윤정인"}, {"room": "E0402", "text": "자기이해와\n진로설계\n01-이지연"}, {"room": "E0101", "text": "자기이해와\n진로설계\n02-곽봉화"}, {"room": "다목적구장\n(우천시N0270)", "text": "생활스포츠\n(축구)\n01-박상한"}, {"room": "E0107", "text": "생활속의예술(음악)\n01-박성국"}, {"room": "어학2실", "text": "AI기반디지털콘텐츠제작\n01-장유정"}, {"room": "J0213", "text": "외국인유학생을위한진로선택과취업준비\n01-정현경"}]}, {"period": "2~4", "time": "10:00~12:50", "entries": [{"room": "어학1실", "text": "중급한국어1\n01-손미정\n(D-2)"}]}, {"period": "3~4", "time": "11:00~12:50", "entries": [{"room": "J0212", "text": "AI와사회변화\n03-노경호"}, {"room": "E0410", "text": "AI와사회변화\n04-정한열"}, {"room": "E0111", "text": "AI와디지털\n윤리\n01-윤정인"}, {"room": "E0402", "text": "자기이해와\n진로설계\n03-이지연"}, {"room": "E0101", "text": "자기이해와\n진로설계\n04-곽봉화"}, {"room": "M0502", "text": "자기이해와\n진로설계\n05-이은경"}, {"room": "M0301", "text": "자기이해와\n진로설계\n06-조성진"}, {"room": "J0211", "text": "한국역사와\n인물\n01-이민우"}, {"room": "J0214", "text": "패션과라이프\n스타일\n01-최영현"}, {"room": "다목적구장\n(우천시N0270)", "text": "생활스포츠\n(축구)\n02-박상한"}, {"room": "E0107", "text": "생활속의예술(음악)\n02-박성국"}, {"room": "어학2실", "text": "AI기반디지털콘텐츠제작\n02-장유정"}]}, {"period": "3~5", "time": "11:00~13:50", "entries": [{"room": "J0213", "text": "중급한국어2\n01-정현경\n(D-2)"}]}, {"period": "6~7", "time": "14:00~15:50", "entries": [{"room": "F0501\n(기초회로제어응용실습실)", "text": "AI와사회변화\n05-이승"}, {"room": "J0212", "text": "AI와사회변화\n06-노경호"}, {"room": "E0410", "text": "AI와사회변화\n07-황재영"}, {"room": "E0111", "text": "AI와디지털\n윤리\n02-윤정인"}, {"room": "E0402", "text": "자기이해와\n진로설계\n07-이지연"}, {"room": "M0502", "text": "자기이해와\n진로설계\n08-이은경"}, {"room": "M0301", "text": "자기이해와\n진로설계\n09-조성진"}, {"room": "J0211", "text": "한국역사와\n인물\n02-이민우"}, {"room": "J0214", "text": "패션과라이프\n스타일\n02-최영현"}, {"room": "다목적구장\n(우천시N0270)", "text": "생활스포츠\n(축구)\n03-박상한"}, {"room": "E0107", "text": "생활속의예술(음악)\n03-박성국"}, {"room": "어학2실", "text": "AI기반디지털콘텐츠제작\n03-장유정"}]}, {"period": "6~8", "time": "14:00~16:50", "entries": [{"room": "어학1실", "text": "한국문화의\n이해1\n01-손미정\n(D-2)"}]}, {"period": "7~9", "time": "15:00~17:50", "entries": [{"room": "J0213", "text": "한국문화의\n이해2\n01-정현경\n(D-2)"}]}, {"period": "8~9", "time": "16:00~17:50", "entries": [{"room": "J0212", "text": "AI와사회변화\n08-노경호"}, {"room": "E0410", "text": "AI와사회변화\n09-황재영"}, {"room": "E0111", "text": "AI와디지털\n윤리\n03-윤정인"}, {"room": "E0402", "text": "AI와사회변화\n10-이지연"}, {"room": "M0502", "text": "자기이해와\n진로설계\n10-이은경"}, {"room": "M0301", "text": "사회적가치와ESG\n01-조성진"}, {"room": "J0211", "text": "한국역사와\n인물\n03-이민우"}, {"room": "J0214", "text": "패션과라이프\n스타일\n03-최영현"}, {"room": "어학2실", "text": "AI와글쓰기\n03-정한열"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}, {"day": "화", "deptBlob": "중점교양 9 ~ 16 (709)\n미래자동차공학부 1-5,6,7(104) / 실내디자인과(25)(실내플래닝전공 1-1, 실내테크니컬설계전공 1-2, 실내건축시공전공 1-3)(115) / 메카트로닉스과(24) 1-1(38)\n스포츠재활학부 1-1,2,3(131) / 바이오헬스케어과 1-1(33) / 언어치료학과 1-1,2(64) / 사회복지학과(23) 1-1,2(84) / 호텔조리과(24) 1-1,2,3,4(140)", "day_periods": [{"period": "1~2", "time": "09:00~10:50", "entries": [{"room": "E0107", "text": "실용영어\n01-류경림"}, {"room": "E0111", "text": "실용영어\n02-박상희"}, {"room": "E0410", "text": "인문학과인성\n01-정애숙"}, {"room": "E0101", "text": "인문학과인성\n02-곽봉화"}, {"room": "J0212", "text": "문제발견과\n개선\n01-윤성은"}, {"room": "E0402", "text": "청년창업과\n기업가정신\n01-조성진"}]}, {"period": "2~3", "time": "10:00~11:50", "entries": [{"room": "체육관", "text": "생활스포츠\n(농구)\n01-전선영"}]}, {"period": "3~4", "time": "11:00~12:50", "entries": [{"room": "E0107", "text": "실용영어\n03-류경림"}, {"room": "E0111", "text": "실용영어\n04-박상희"}, {"room": "J0211", "text": "실용영어\n05-김은정"}, {"room": "J0213", "text": "실용영어\n06-유수진"}, {"room": "E0410", "text": "인문학과인성\n03-정애숙"}, {"room": "E0101", "text": "인문학과인성\n04-곽봉화"}, {"room": "J0214", "text": "인문학과인성\n05-김진이"}, {"room": "J0212", "text": "문제발견과\n개선\n02-윤성은"}, {"room": "E0402", "text": "청년창업과\n기업가정신\n02-조성진"}, {"room": "N0270", "text": "시민사회와\n공동체\n01-신세덕"}, {"room": "M0301", "text": "생활속의예술(영화)\n01-남명희"}, {"room": "어학2실", "text": "AI와디지털\n리터러시\n01-윤정인"}, {"room": "M0502", "text": "행복한\n삶의지혜\n01-박서영"}]}, {"period": "5~6", "time": "13:00~14:50", "entries": [{"room": "체육관", "text": "생활스포츠\n(농구)\n02-전선영"}]}, {"period": "6~7", "time": "14:00~15:50", "entries": [{"room": "E0107", "text": "실용영어\n07-류경림"}, {"room": "E0111", "text": "실용영어\n08-박상희"}, {"room": "J0211", "text": "실용영어\n09-김은정"}, {"room": "J0213", "text": "실용영어\n10-유수진"}, {"room": "E0101", "text": "인문학과인성\n06-곽봉화"}, {"room": "J0214", "text": "인문학과인성\n07-김진이"}, {"room": "J0212", "text": "인문학과인성\n08-윤성은"}, {"room": "M0301", "text": "생활속의예술(영화)\n02-남명희"}, {"room": "어학2실", "text": "AI와디지털\n리터러시\n02-윤정인"}, {"room": "M0502", "text": "행복한\n삶의지혜\n02-박서영"}]}, {"period": "7~8", "time": "15:00~16:50", "entries": [{"room": "체육관", "text": "생활스포츠\n(농구)\n03-전선영"}]}, {"period": "8~9", "time": "16:00~17:50", "entries": [{"room": "J0211", "text": "실용영어\n11-김은정"}, {"room": "J0213", "text": "실용영어\n12-유수진"}, {"room": "E0101", "text": "인문학과인성\n09-곽봉화"}, {"room": "J0214", "text": "인문학과인성\n10-김진이"}, {"room": "M0301", "text": "생활속의예술(영화)\n03-남명희"}, {"room": "어학2실", "text": "AI와디지털\n리터러시\n03-윤정인"}, {"room": "M0502", "text": "행복한\n삶의지혜\n03-박서영"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}, {"day": "수", "deptBlob": "중점교양 17 ~ 24 (608)\nAI시스템과 1-1,2(74) / 방송음향기술과 1-1,2(86) / 소방안전설비과 1-1,2,3(114) / 유아교육과 1-1,2(56) / 기계공학과(23) 1-1,2(84) / 건설환경공학과 1-1,2(64)\n도서관미디어정보과 1-1,2(65) / 응급구조과 1-1,2(65)", "day_periods": [{"period": "1~2", "time": "09:00~10:50", "entries": [{"room": "F0518", "text": "AI와사회변화\n11-이승"}, {"room": "E0402", "text": "AI와사회변화\n12-윤정인"}, {"room": "E0410", "text": "AI와사회변화\n13-이지연"}, {"room": "J0212", "text": "자기이해와\n진로설계\n11-곽봉화"}, {"room": "E0111", "text": "자기이해와\n진로설계\n12-문은미"}, {"room": "J0211", "text": "재미있는영어소설읽기\n01-김은주"}, {"room": "어학2실", "text": "AI와글쓰기\n01-정한열"}, {"room": "E0107", "text": "사회적가치와ESG\n02-조성진"}, {"room": "E0101", "text": "공간과건축\n01-강동한"}]}, {"period": "3~4", "time": "11:00~12:50", "entries": [{"room": "F0518", "text": "AI와사회변화\n14-이승"}, {"room": "E0402", "text": "AI와사회변화\n15-윤정인"}, {"room": "E0410", "text": "AI와사회변화\n16-이지연"}, {"room": "J0212", "text": "자기이해와\n진로설계\n13-곽봉화"}, {"room": "E0111", "text": "자기이해와\n진로설계\n14-문은미"}, {"room": "M0301", "text": "자기이해와\n진로설계\n15-윤성은"}, {"room": "M0502", "text": "심리와\n감성지능\n01-이은경"}, {"room": "J0214", "text": "대인관계와\n팀워크\n01-최빛나"}, {"room": "N0270", "text": "환경과\n생활건강\n01-오미영"}, {"room": "H0202", "text": "팝컬처\n잉글리쉬\n01-조미라"}, {"room": "J0211", "text": "재미있는영어소설읽기\n02-김은주"}, {"room": "어학2실", "text": "AI와글쓰기\n02-정한열"}, {"room": "E0107", "text": "사회적가치와ESG\n03-조성진"}, {"room": "E0101", "text": "공간과건축\n02-강동한"}]}, {"period": "4~5", "time": "12:00~13:50", "entries": [{"room": "J0213", "text": "생활법률\n01-김배정"}]}, {"period": "6~7", "time": "14:00~15:50", "entries": [{"room": "E0402", "text": "안양학\n01-윤정인"}, {"room": "E0410", "text": "AI와사회변화\n18-황재영"}, {"room": "J0212", "text": "AI와사회변화\n17-정한열"}, {"room": "E0111", "text": "자기이해와\n진로설계\n16-문은미"}, {"room": "M0301", "text": "자기이해와\n진로설계\n17-윤성은"}, {"room": "M0502", "text": "자기이해와\n진로설계\n18-이은경"}, {"room": "J0214", "text": "대인관계와\n팀워크\n02-최빛나"}, {"room": "N0270", "text": "환경과\n생활건강\n02-오미영"}, {"room": "H0202", "text": "팝컬처\n잉글리쉬\n02-조미라"}, {"room": "J0211", "text": "재미있는영어소설읽기\n03-김은주"}, {"room": "E0101", "text": "시민사회와\n공동체\n02-신세덕"}, {"room": "J0213", "text": "생활법률\n02-김배정"}]}, {"period": "8~9", "time": "16:00~17:50", "entries": [{"room": "E0410", "text": "AI와사회변화\n20-황재영"}, {"room": "J0212", "text": "AI와사회변화\n19-정한열"}, {"room": "M0301", "text": "자기이해와\n진로설계\n19-윤성은"}, {"room": "M0502", "text": "자기이해와\n진로설계\n20-이은경"}, {"room": "J0214", "text": "대인관계와\n팀워크\n03-최빛나"}, {"room": "N0270", "text": "환경과\n생활건강\n03-오미영"}, {"room": "H0202", "text": "팝컬처\n잉글리쉬\n03-조미라"}, {"room": "J0213", "text": "생활법률\n03-김배정"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}, {"day": "목", "deptBlob": "중점교양 25 ~ 32 (583)\n치위생과 1-1(30) / 경영학과 1-1,2(82) / 보건안전학과 1-1(39) / 항공호텔관광과 1-1,2(81) / 전기공학과(23) 1-1,2,3(125)\n보건의료행정과 1-1,2(91) / 제과제빵과 1-1,2,3,4(135)", "day_periods": [{"period": "1~2", "time": "09:00~10:50", "entries": [{"room": "E0107", "text": "실용영어\n13-이강숙"}, {"room": "E0410", "text": "인문학과인성\n11-윤성은"}, {"room": "E0402", "text": "인문학과인성\n12-정애숙"}, {"room": "J0214", "text": "생활속의예술(사진)\n01-윤영희"}, {"room": "J0213", "text": "여행과레저\n01-이해솔"}, {"room": "골프연습실", "text": "생활스포츠\n(골프)\n01-진용일"}]}, {"period": "2~3", "time": "10:00~11:50", "entries": [{"room": "H0202", "text": "한국현대사\n01-김지훈"}, {"room": "M0502", "text": "영상으로읽는문화\n01-이성호"}, {"room": "E0111", "text": "생활속의예술(미술)\n01-홍희진"}, {"room": "필라테스\n스튜디오", "text": "생활스포츠\n(필라테스)\n01-정지영"}]}, {"period": "3~4", "time": "11:00~12:50", "entries": [{"room": "E0107", "text": "실용영어\n14-이강숙"}, {"room": "E0101", "text": "실용영어\n15-배지예"}, {"room": "J0211", "text": "실용영어\n16-심미경"}, {"room": "M0301", "text": "실용영어\n17-정형석"}, {"room": "E0410", "text": "인문학과인성\n13-윤성은"}, {"room": "E0402", "text": "인문학과인성\n14-정애숙"}, {"room": "J0212", "text": "인문학과인성\n15-신세덕"}, {"room": "J0214", "text": "생활속의예술(사진)\n02-윤영희"}, {"room": "J0213", "text": "여행과레저\n02-이해솔"}, {"room": "골프연습실", "text": "생활스포츠\n(골프)\n02-진용일"}]}, {"period": "5~6", "time": "13:00~14:50", "entries": [{"room": "H0202", "text": "한국현대사\n02-김지훈"}, {"room": "M0502", "text": "영상으로읽는문화\n02-이성호"}, {"room": "E0111", "text": "생활속의예술(미술)\n02-홍희진"}, {"room": "필라테스\n스튜디오", "text": "생활스포츠\n(필라테스)\n02-정지영"}]}, {"period": "6~7", "time": "14:00~15:50", "entries": [{"room": "E0107", "text": "실용영어\n18-이강숙"}, {"room": "E0101", "text": "실용영어\n19-배지예"}, {"room": "J0211", "text": "실용영어\n20-심미경"}, {"room": "M0301", "text": "실용영어\n21-정형석"}, {"room": "E0402", "text": "인문학과인성\n16-정애숙"}, {"room": "J0212", "text": "인문학과인성\n17-신세덕"}, {"room": "J0214", "text": "생활속의예술(사진)\n03-윤영희"}, {"room": "J0213", "text": "여행과레저\n03-이해솔"}]}, {"period": "7~8", "time": "15:00~16:50", "entries": [{"room": "H0202", "text": "한국현대사\n03-김지훈"}, {"room": "M0502", "text": "영상으로읽는문화\n03-이성호"}, {"room": "E0111", "text": "생활속의예술(미술)\n03-홍희진"}, {"room": "필라테스\n스튜디오", "text": "생활스포츠\n(필라테스)\n03-정지영"}]}, {"period": "8~9", "time": "16:00~17:50", "entries": [{"room": "J0211", "text": "실용영어\n22-심미경"}, {"room": "M0301", "text": "실용영어\n23-정형석"}, {"room": "E0402", "text": "인문학과인성\n18-정애숙"}, {"room": "J0212", "text": "인문학과인성\n19-신세덕"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}, {"day": "금", "deptBlob": null, "day_periods": [{"period": "1~2", "time": "09:00~10:50", "entries": [{"room": "E0101", "text": "커뮤니케이션\n02-이지연"}, {"room": "E0410", "text": "체험적\n인성개발\n01-정애숙"}, {"room": "어학2실", "text": "AI와코딩\n01-정한열"}]}, {"period": "3~4", "time": "11:00~12:50", "entries": [{"room": "E0402", "text": "심리와\n감성지능\n02-이은경"}, {"room": "E0101", "text": "커뮤니케이션\n03-이지연"}, {"room": "E0410", "text": "체험적\n인성개발\n02-정애숙"}, {"room": "어학2실", "text": "AI와코딩\n02-정한열"}]}, {"period": "6~7", "time": "14:00~15:50", "entries": [{"room": "E0402", "text": "말과글쓰기\n01-이은경"}, {"room": "어학2실", "text": "AI와코딩\n03-정한열"}]}, {"period": "8~9", "time": "16:00~17:50", "entries": [{"room": "E0402", "text": "말과글쓰기\n02-이은경"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}, {"day": "토(산업체위탁)", "deptBlob": null, "day_periods": [{"period": "3~4", "time": "11:00~12:50", "entries": [{"room": "J0211", "text": "직업윤리\n01-이은경"}]}, {"period": "5~6", "time": "13:00~14:50", "entries": [{"room": "J0211", "text": "소자본창업\n01-조성진"}]}, {"period": "7~8", "time": "15:00~16:50", "entries": [{"room": "J0211", "text": "소통과협력\n01-이지연"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}, {"day": "일(외국인 유학생(재직자))", "deptBlob": null, "day_periods": [{"period": "5~7", "time": "13:25~16:05", "entries": [{"room": "어학A실 (율곡관)", "text": "중급한국어1\n02-정은주\n(E-9)"}, {"room": "어학1실 (율곡관)", "text": "중급한국어2\n02-박정현\n(E-9)"}]}, {"period": "8~10", "time": "16:10~18:50", "entries": [{"room": "어학A실 (율곡관)", "text": "한국문화의이해1\n02-정은주\n(E-9)"}, {"room": "어학1실 (율곡관)", "text": "한국문화의이해2\n02-박정현\n(E-9)"}]}], "night_periods": []}], "deptIndex": [{"name": "미래자동차공학부", "day": "월", "detail": "1-1, 2, 3, 4반 (144명)", "sections": ["1반", "2반", "3반", "4반"]}, {"name": "영상디자인과", "day": "월", "detail": "1-1, 2반 (80명)", "sections": ["1반", "2반"]}, {"name": "반도체학과", "day": "월", "detail": "반도체디자인전공(23학번) 1-1반 / 반도체장비전공(23학번) 1-2, 3반 (100명)", "sections": ["반도체디자인전공 1반", "반도체장비전공 2반", "반도체장비전공 3반"]}, {"name": "소프트웨어학부", "day": "월", "detail": "1-1, 2, 3반 (111명)", "sections": ["1반", "2반", "3반"]}, {"name": "사무행정학과", "day": "월", "detail": "1-1, 2반 (66명)", "sections": ["1반", "2반"]}, {"name": "건축과", "day": "월", "detail": "건축디자인전공(22학번) 1-1, 2반 / 건축엔지니어링전공(22학번) 1-3반 (102명)", "sections": ["건축디자인전공 1반", "건축디자인전공 2반", "건축엔지니어링전공 3반"]}, {"name": "미래자동차공학부", "day": "화", "detail": "1-5, 6, 7반 (104명)", "sections": ["5반", "6반", "7반"]}, {"name": "실내디자인과", "day": "화", "detail": "(25학번) 실내플래닝전공 1-1반, 실내테크니컬설계전공 1-2반, 실내건축시공전공 1-3반 (115명)", "sections": ["실내플래닝전공 1반", "실내테크니컬설계전공 2반", "실내건축시공전공 3반"]}, {"name": "메카트로닉스과", "day": "화", "detail": "(24학번) 1-1반 (38명)", "sections": ["1반"]}, {"name": "스포츠재활학부", "day": "화", "detail": "1-1, 2, 3반 (131명)", "sections": ["1반", "2반", "3반"]}, {"name": "바이오헬스케어과", "day": "화", "detail": "1-1반 (33명)", "sections": ["1반"]}, {"name": "언어치료학과", "day": "화", "detail": "1-1, 2반 (64명)", "sections": ["1반", "2반"]}, {"name": "사회복지학과", "day": "화", "detail": "(23학번) 1-1, 2반 (84명)", "sections": ["1반", "2반"]}, {"name": "호텔조리과", "day": "화", "detail": "(24학번) 1-1, 2, 3, 4반 (140명)", "sections": ["1반", "2반", "3반", "4반"]}, {"name": "AI시스템과", "day": "수", "detail": "1-1, 2반 (74명)", "sections": ["1반", "2반"]}, {"name": "방송음향기술과", "day": "수", "detail": "1-1, 2반 (86명)", "sections": ["1반", "2반"]}, {"name": "소방안전설비과", "day": "수", "detail": "1-1, 2, 3반 (114명)", "sections": ["1반", "2반", "3반"]}, {"name": "유아교육과", "day": "수", "detail": "1-1, 2반 (56명)", "sections": ["1반", "2반"]}, {"name": "기계공학과", "day": "수", "detail": "(23학번) 1-1, 2반 (84명)", "sections": ["1반", "2반"]}, {"name": "건설환경공학과", "day": "수", "detail": "1-1, 2반 (64명)", "sections": ["1반", "2반"]}, {"name": "도서관미디어정보과", "day": "수", "detail": "1-1, 2반 (65명)", "sections": ["1반", "2반"]}, {"name": "응급구조과", "day": "수", "detail": "1-1, 2반 (65명)", "sections": ["1반", "2반"]}, {"name": "치위생과", "day": "목", "detail": "1-1반 (30명)", "sections": ["1반"]}, {"name": "경영학과", "day": "목", "detail": "1-1, 2반 (82명)", "sections": ["1반", "2반"]}, {"name": "보건안전학과", "day": "목", "detail": "1-1반 (39명)", "sections": ["1반"]}, {"name": "항공호텔관광과", "day": "목", "detail": "1-1, 2반 (81명)", "sections": ["1반", "2반"]}, {"name": "전기공학과", "day": "목", "detail": "(23학번) 1-1, 2, 3반 (125명)", "sections": ["1반", "2반", "3반"]}, {"name": "보건의료행정과", "day": "목", "detail": "1-1, 2반 (91명)", "sections": ["1반", "2반"]}, {"name": "제과제빵과", "day": "목", "detail": "1-1, 2, 3, 4반 (135명)", "sections": ["1반", "2반", "3반", "4반"]}]}, "majorCompletion": {"day_periods": [{"period": "2~3", "time": "10:00~11:50", "entries": [{"room": "J0213", "text": "사랑과심리(비대면 원격수업) \n01-정애숙"}, {"room": "J0214", "text": "리더십과팔로워십(비대면 원격수업) \n01-이지연"}]}, {"period": "5~6", "time": "13:00~14:50", "entries": [{"room": "J0213", "text": "트렌드인사이트(비대면 원격수업) 01-정한열"}, {"room": "J0214", "text": "ESG와사회공헌(비대면 원격수업) 01-조성진"}]}, {"period": "7~8", "time": "15:00~16:50", "entries": [{"room": "J0213", "text": "스마트워크(비대면 원격수업) \n 01-윤정인"}]}], "night_periods": [{"period": "야간\n1교시", "time": "18:30~19:15", "entries": []}, {"period": "야간\n2교시", "time": "19:15~20:00", "entries": []}, {"period": "야간\n3교시", "time": "20:05~20:50", "entries": []}, {"period": "야간\n4교시", "time": "20:55~21:40", "entries": []}, {"period": "야간\n5교시", "time": "21:40~22:25", "entries": []}]}}</script>
+<script>
+(function () {
+  var DATA = JSON.parse(document.getElementById('tt-data').textContent);
+  var ASSOC = DATA.associate;
+  var MAJOR = DATA.majorCompletion;
+
+  // ---------- tabs ----------
+  var tabs = document.getElementById('tabs');
+  tabs.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-tab]');
+    if (!btn) return;
+    Array.prototype.forEach.call(tabs.querySelectorAll('button'), function (b) {
+      b.classList.toggle('active', b === btn);
+    });
+    document.getElementById('panel-associate').classList.toggle('active', btn.dataset.tab === 'associate');
+    document.getElementById('panel-major').classList.toggle('active', btn.dataset.tab === 'major');
+  });
+
+  // ---------- helpers ----------
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function endsAtOrAfterSix(timeLabel) {
+    if (!timeLabel) return false;
+    var m = /~(\d{1,2}):(\d{2})/.exec(timeLabel);
+    if (!m) return false;
+    return parseInt(m[1], 10) >= 18;
+  }
+
+  function classifyBadge(text) {
+    if (/^중점교양\s*\d/.test(text)) return { label: '중점교양', cls: 'common' };
+    if (/^자율선택\s*\n?교양\s*\d/.test(text) || /^자율선택교양\s*\d/.test(text)) return { label: '자율선택', cls: 'elective' };
+    return null;
+  }
+
+  function renderBoard(container, dayLabel, dayPeriods, nightPeriods, note) {
+    container.innerHTML = '';
+    var titleRow = el('div', 'day-view-title');
+    titleRow.appendChild(el('span', 'day-name', dayLabel + '요일 시간표'));
+    if (note) titleRow.appendChild(el('span', 'day-note', note));
+    container.appendChild(titleRow);
+
+    var scroll = el('div', 'table-scroll');
+    var table = document.createElement('table');
+    table.className = 'board';
+    var thead = document.createElement('thead');
+    var htr = document.createElement('tr');
+    ['교시 · 시간', '강의 내용'].forEach(function (h) { htr.appendChild(el('th', null, h)); });
+    thead.appendChild(htr);
+    table.appendChild(thead);
+
+    var tbody = document.createElement('tbody');
+    function addRows(periods, forceNight) {
+      periods.forEach(function (p) {
+        if (!p.entries || p.entries.length === 0) return;
+        var isNight = forceNight || endsAtOrAfterSix(p.time);
+        var tr = document.createElement('tr');
+        if (isNight) tr.className = 'night-row';
+        var pcell = el('td', 'period-cell');
+        var pnumSpan = el('span', 'pnum', String(p.period));
+        pcell.appendChild(pnumSpan);
+        pcell.appendChild(document.createTextNode(' ' + (p.time || '')));
+        if (isNight) {
+          var tag = el('span', 'badge-tag', '야간');
+          tag.style.color = 'var(--tag-night)';
+          tag.style.background = 'var(--tag-night-bg)';
+          tag.style.marginLeft = '6px';
+          pcell.appendChild(tag);
+        }
+        tr.appendChild(pcell);
+        var ccell = document.createElement('td');
+        p.entries.forEach(function (ent) {
+          var block = el('div', 'course-cell');
+          var rc = el('span', 'room-code', ent.room.replace(/\n/g, ' '));
+          block.appendChild(rc);
+          var badge = classifyBadge(ent.text);
+          var txt = ent.text;
+          if (badge) {
+            var b = el('span', 'badge-tag ' + badge.cls, badge.label);
+            block.appendChild(document.createElement('br'));
+            block.appendChild(b);
+          }
+          var ctext = el('span', 'course-text', txt);
+          block.appendChild(document.createElement('br'));
+          block.appendChild(ctext);
+          ccell.appendChild(block);
+        });
+        tr.appendChild(ccell);
+        tbody.appendChild(tr);
+      });
+    }
+    addRows(dayPeriods, false);
+    addRows(nightPeriods, true);
+    table.appendChild(tbody);
+    scroll.appendChild(table);
+    container.appendChild(scroll);
+  }
+
+  // ---------- associate (전문학사) tab ----------
+  var deptButtonsEl = document.getElementById('deptButtons');
+  var sectionCard = document.getElementById('sectionCard');
+  var sectionHint = document.getElementById('sectionHint');
+  var sectionButtonsEl = document.getElementById('sectionButtons');
+  var associateDayView = document.getElementById('associateDayView');
+  var specialDaysEl = document.getElementById('specialDays');
+
+  var uniqueNames = [];
+  ASSOC.deptIndex.forEach(function (d) {
+    if (uniqueNames.indexOf(d.name) === -1) uniqueNames.push(d.name);
+  });
+  uniqueNames.sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+
+  uniqueNames.forEach(function (name) {
+    var btn = el('button', 'dept-btn', name);
+    btn.type = 'button';
+    btn.dataset.name = name;
+    btn.addEventListener('click', function () { selectDept(name); });
+    deptButtonsEl.appendChild(btn);
+  });
+
+  function findDayBlock(dayName) {
+    return ASSOC.days.filter(function (d) { return d.day === dayName; })[0];
+  }
+
+  function clearSpecialSelection() {
+    Array.prototype.forEach.call(specialDaysEl.querySelectorAll('button'), function (b) {
+      b.classList.remove('selected');
+    });
+  }
+
+  function selectDept(name) {
+    clearSpecialSelection();
+    Array.prototype.forEach.call(deptButtonsEl.querySelectorAll('button'), function (b) {
+      b.classList.toggle('selected', b.dataset.name === name);
+    });
+    var entries = ASSOC.deptIndex.filter(function (d) { return d.name === name; });
+    sectionButtonsEl.innerHTML = '';
+    associateDayView.innerHTML = '';
+    var dayCount = entries.length;
+    sectionHint.textContent = dayCount > 1
+      ? name + '은(는) 요일마다 반이 달라요. 아래에서 본인 반을 눌러주세요.'
+      : '아래에서 본인 반을 눌러 시간표를 확인하세요.';
+    entries.forEach(function (entry) {
+      entry.sections.forEach(function (label) {
+        var btn = el('button', 'section-btn');
+        btn.type = 'button';
+        var dayTag = el('span', 'section-day', entry.day + '요일');
+        btn.appendChild(dayTag);
+        btn.appendChild(document.createTextNode(label));
+        btn.addEventListener('click', function () {
+          Array.prototype.forEach.call(sectionButtonsEl.querySelectorAll('button'), function (b) { b.classList.remove('selected'); });
+          btn.classList.add('selected');
+          showAssociateDay(entry.day, name, label);
+          associateDayView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        sectionButtonsEl.appendChild(btn);
+      });
+    });
+    sectionCard.hidden = false;
+    sectionCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showAssociateDay(dayName, deptName, sectionLabel) {
+    var block = findDayBlock(dayName);
+    if (!block) { associateDayView.innerHTML = ''; return; }
+    renderBoard(associateDayView, dayName.replace(/[()].*$/, ''), block.day_periods, block.night_periods, '(' + dayName + ')');
+    if (deptName && sectionLabel) {
+      var confirm = el('div', 'section-confirm', '✓ ' + deptName + ' · ' + sectionLabel + ' — ' + dayName + '요일 시간표예요');
+      associateDayView.insertBefore(confirm, associateDayView.firstChild);
+    }
+  }
+
+  // special days (금, 토(산업체위탁), 일(외국인유학생))
+  var specialNames = ['금', '토(산업체위탁)', '일(외국인 유학생(재직자))'];
+  var specialLabels = { '금': '금요일 (자율선택교양)', '토(산업체위탁)': '토요일 (산업체위탁)', '일(외국인 유학생(재직자))': '일요일 (외국인 유학생·재직자)' };
+  specialNames.forEach(function (name) {
+    var btn = el('button', null, specialLabels[name]);
+    btn.type = 'button';
+    btn.dataset.day = name;
+    btn.addEventListener('click', function () {
+      Array.prototype.forEach.call(deptButtonsEl.querySelectorAll('button'), function (b) { b.classList.remove('selected'); });
+      sectionCard.hidden = true;
+      sectionButtonsEl.innerHTML = '';
+      Array.prototype.forEach.call(specialDaysEl.querySelectorAll('button'), function (b) { b.classList.toggle('selected', b === btn); });
+      showAssociateDay(name);
+      associateDayView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    specialDaysEl.appendChild(btn);
+  });
+
+  // ---------- major completion (전공심화) tab ----------
+  var majorDayView = document.getElementById('majorDayView');
+  renderBoard(majorDayView, '토(학사학위 전공심화)'.replace(/[()].*$/, ''), MAJOR.day_periods, MAJOR.night_periods, '');
+})();
+</script>
