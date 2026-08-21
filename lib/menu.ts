@@ -56,8 +56,32 @@ export const MENU_NODES: Record<string, MenuNode> = {
       { label: "✅ P/F 과목", targetId: "pf-course" },
       { label: "☎️ 교내 연락처", targetId: "contacts" },
       { label: "🚌 통학버스", targetId: "shuttle" },
+      { label: "🗓️ 교양시간표", targetId: "elective-timetable" },
       { label: "❓ 자주 묻는 질문", targetId: "faq" },
     ],
+  },
+
+  // ----- 교양시간표 (2026학년도 2학기 교양시간표 원본 파일 기준, 학과 검색 도구) -----
+  "elective-timetable": {
+    id: "elective-timetable",
+    intro:
+      "2026학년도 2학기 교양시간표를 학과 이름으로 검색할 수 있는 도구예요.\n아래 버튼을 누르면 새 창에서 열려요. 학과·학년·반을 선택하면 해당 요일 시간표를 바로 확인할 수 있어요.",
+    topLink: { label: "🗓️ 교양시간표 검색 도구 열기", url: "/timetable.html" },
+    cards: [
+      {
+        title: "전문학사 · 산업체위탁",
+        body: "학과 이름을 검색하면 해당 학년·반이 속한 요일의 시간표를 보여줘요.",
+      },
+      {
+        title: "학사학위 전공심화",
+        body: "전공심화 과정은 학과와 무관하게 전원 토요일에 수업이 있어요. 그룹 1·그룹 2 시간표를 확인하세요.",
+      },
+      {
+        title: "안내",
+        body: "학교에서 배포한 원본 시간표를 그대로 옮긴 참고용 도구예요. 정확한 개인 시간표(강의실 배정 등)는 반드시 학생포털에서 다시 확인해주세요.",
+      },
+    ],
+    quickReplies: [{ label: "처음으로", targetId: "root" }],
   },
 
   // ----- 장학금 (2026학년도 2학기 국가장학금/국가근로장학금/우선감면/주거안정장학금 공지 기준) -----
@@ -486,6 +510,7 @@ export const MENU_NODES: Record<string, MenuNode> = {
       },
     ],
     quickReplies: [
+      { label: "🗓️ 교양시간표 확인", targetId: "elective-timetable" },
       { label: "수강신청 메뉴로", targetId: "course" },
       { label: "처음으로", targetId: "root" },
     ],

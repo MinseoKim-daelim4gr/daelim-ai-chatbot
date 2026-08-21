@@ -353,6 +353,22 @@ export const FAQ_ITEMS: FaqItem[] = [
     link: { label: "포털 바로가기", url: OFFICIAL_LINKS.portal },
   },
   {
+    id: "elective-timetable-tool",
+    keywords: [
+      "교양시간표",
+      "교양 시간표",
+      "교양시간표 찾기",
+      "교양과목 시간표",
+      "중점교양 시간표",
+      "선택교양 시간표",
+      "시간표 찾기",
+    ],
+    question: "교양시간표를 확인하고 싶어요",
+    answer:
+      "학과(또는 반)를 선택하면 배정된 요일·교시별 교양 시간표를 바로 확인할 수 있는 도구예요. 전문학사·산업체위탁 시간표와 전공심화(학사학위) 시간표를 모두 볼 수 있어요.",
+    link: { label: "🗓️ 교양시간표 찾기 도구 열기", url: "/timetable.html" },
+  },
+  {
     id: "course-eligibility",
     keywords: ["수강대상", "수강 가능", "수강대상 확인"],
     question: "수강대상 확인은 어떻게 하나요?",

@@ -4,14 +4,14 @@
    보조색상: DUC Silver / DUC Black / DUC Dark Brown / DUC Orange / DUC Green
    ========================================================================= */
 :root {
-  --duc-blue: #3d95ce;
-  --duc-blue-dark: #2973a3;
-  --duc-blue-tint: #ecf4fa;
-  --duc-gray: #4a4a4a;
-  --duc-silver: #a7a9ac;
-  --duc-black: #272425;
-  --duc-orange: #f18308;
-  --duc-green: #80bd26;
+  --duc-blue: #00a6dd;
+  --duc-blue-dark: #2985a3;
+  --duc-blue-tint: #ecf7fa;
+  --duc-gray: #717171;
+  --duc-silver: #a6aaae;
+  --duc-black: #08080c;
+  --duc-orange: #f7961c;
+  --duc-green: #8ec73c;
 }
 
 * {
@@ -232,7 +232,7 @@ body {
 }
 
 .top-link-btn:hover {
-  background: #d3edf7;
+  background: #d3eef7;
 }
 
 /* 항상 5열을 유지하고, 카드가 5개를 넘어가면 자동으로 다음 행으로 넘어감
@@ -248,7 +248,7 @@ body {
   border: 1px solid #e4e6ea;
   border-radius: 10px;
   padding: 14px;
-  background: rgb(230, 238, 244);
+  background: rgb(230, 241, 244);
 }
 
 .info-card-title {
@@ -503,13 +503,13 @@ body {
 }
 
 .answer-badge.official {
-  background: rgba(128, 189, 38, 0.15);
-  color: #567f18;
+  background: rgba(142, 199, 60, 0.15);
+  color: #557f18;
 }
 
 .answer-badge.ai {
-  background: rgba(241, 131, 8, 0.15);
-  color: #b8630a;
+  background: rgba(247, 150, 28, 0.15);
+  color: #b86b0a;
 }
 
 /* AI 생성 답변 아래에 매번 붙는 재확인 안내 문구 */
