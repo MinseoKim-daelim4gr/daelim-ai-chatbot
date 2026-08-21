@@ -493,8 +493,10 @@ function TurnView({
           {node.quickReplies && node.quickReplies.length > 0 && (
             isRoot ? (
               <MenuGrid quickReplies={node.quickReplies} onGoTo={onGoTo} />
+            ) : node.id === "faq" ? (
+              <FaqQuickReplies quickReplies={node.quickReplies} onGoTo={onGoTo} />
             ) : (
-              <div className={node.id === "faq" ? "quick-replies-2" : "quick-replies"}>
+              <div className="quick-replies">
                 {node.quickReplies.map((qr, i) => {
                   const label = qr.label;
                   const handleClick = () =>
@@ -686,7 +688,7 @@ function MenuGrid({
       0,
       Math.min(maxStartIndex, fromIndex + direction * visibleCount)
     );
-    el.scrollLeft = columns[targetIndex].offsetLeft;
+    el.scrollTo({ left: columns[targetIndex].offsetLeft, behavior: "smooth" });
   }
 
   // 한 화면에 보이는 열 개수(.menu-grid의 grid-auto-columns 계산식과 맞춰야 함).
@@ -755,6 +757,141 @@ function MenuGrid({
           ›
         </button>
       </div>
+    </div>
+  );
+}
+
+// 자주 묻는 질문(faq 노드) 목록용 가로 스크롤 + ‹ › 페이지 이동 버튼.
+// 루트 메뉴의 MenuGrid와 같은 드래그/페이지 이동 로직을 쓰되, 질문 버튼은
+// 아이콘 없는 알약(pill) 모양 그대로 두기 위해 별도 컴포넌트로 둠
+// (MenuGrid는 라벨 첫 단어를 이모지 아이콘으로 취급하는데, FAQ 질문 문장에는
+// 이모지가 없어서 그대로 재사용하면 첫 단어가 아이콘 자리로 잘못 들어감)
+// .quick-replies-2의 grid-template-rows와 반드시 같은 값으로 유지
+const FAQ_ROWS = 3;
+
+function FaqQuickReplies({
+  quickReplies,
+  onGoTo,
+}: {
+  quickReplies: QuickReply[];
+  onGoTo: (targetId: string, label: string) => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const drag = useRef({ down: false, moved: false, startX: 0, startScrollLeft: 0 });
+  // 질문 개수가 적어서(현재 5칸 이하) 실제로 스크롤할 내용이 없으면 좌우 버튼을
+  // 아예 숨김. 화면 폭에 따라 결과가 달라지므로 목록이 바뀔 때/창 크기가
+  // 바뀔 때마다 다시 계산함
+  const [canScroll, setCanScroll] = useState(false);
+
+  useEffect(() => {
+    function checkOverflow() {
+      const el = scrollRef.current;
+      if (!el) return;
+      setCanScroll(el.scrollWidth - el.clientWidth > 1);
+    }
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [quickReplies]);
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el) return;
+    drag.current = { down: true, moved: false, startX: e.clientX, startScrollLeft: el.scrollLeft };
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el || !drag.current.down) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 3) drag.current.moved = true;
+    el.scrollLeft = drag.current.startScrollLeft - dx;
+  }
+
+  function handlePointerUp() {
+    drag.current.down = false;
+  }
+
+  function handleItemClick(action: () => void) {
+    if (drag.current.moved) {
+      drag.current.moved = false;
+      return;
+    }
+    action();
+  }
+
+  // faq 목록은 항목 수가 고정돼 있지 않아(질문이 더 추가될 수 있음) MenuGrid처럼
+  // 필러로 열 개수를 맞추지 않고, 버튼의 실제 위치(offsetLeft)를 그때그때 읽어서
+  // 화면에 보이는 열 수만큼 이동함. FAQ_ROWS는 .quick-replies-2의
+  // grid-template-rows 값과 항상 맞춰야 함(현재 3행)
+  function scrollByPage(direction: 1 | -1) {
+    const el = scrollRef.current;
+    if (!el) return;
+    const items = Array.from(el.querySelectorAll<HTMLElement>(".quick-reply-btn"));
+    if (items.length < 2) return;
+    const columns = items.filter((_, i) => i % FAQ_ROWS === 0);
+    if (columns.length < 2) return;
+    const stride = columns[1].offsetLeft - columns[0].offsetLeft;
+    const visibleCount = Math.max(1, Math.round(el.clientWidth / stride));
+    const maxStartIndex = Math.max(0, columns.length - visibleCount);
+    const currentIndex = columns.findIndex((c) => c.offsetLeft >= el.scrollLeft - 1);
+    const fromIndex = currentIndex === -1 ? maxStartIndex : currentIndex;
+    const targetIndex = Math.max(
+      0,
+      Math.min(maxStartIndex, fromIndex + direction * visibleCount)
+    );
+    // 클릭했을 때 이동이 눈에 잘 띄도록 부드럽게 스크롤(즉시 점프하면 이동량이
+    // 작을 때 버튼이 안 눌린 것처럼 보일 수 있음)
+    el.scrollTo({ left: columns[targetIndex].offsetLeft, behavior: "smooth" });
+  }
+
+  return (
+    <div className="menu-grid-wrap">
+      <div
+        className="quick-replies-2"
+        ref={scrollRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      >
+        {quickReplies.map((qr, i) => {
+          const label = qr.label;
+          const handleClick = () =>
+            "targetId" in qr && qr.targetId
+              ? onGoTo(qr.targetId, label)
+              : onGoTo(qr.askText!, label);
+          return (
+            <button
+              key={i}
+              className="quick-reply-btn"
+              onClick={() => handleItemClick(handleClick)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      {canScroll && (
+        <div className="menu-nav">
+          <button
+            type="button"
+            className="menu-nav-btn"
+            aria-label="이전"
+            onClick={() => scrollByPage(-1)}
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className="menu-nav-btn"
+            aria-label="다음"
+            onClick={() => scrollByPage(1)}
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   );
 }

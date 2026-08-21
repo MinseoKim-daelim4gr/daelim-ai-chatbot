@@ -11,8 +11,8 @@ export const OFFICIAL_LINKS = {
   home: "https://www.daelim.ac.kr/index.do",
   // 대림대 포털 (학사정보시스템 - 수강신청/성적조회/등록금 확인 등이 실제로 이루어지는 곳)
   portal: "https://pt.daelim.ac.kr/",
-  // 장학/대출 안내 페이지
-  scholarship: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=990",
+  // 장학/대출 안내 페이지 (교내장학 종류별 선정기준·지급액 표 + 교외장학 + 국가장학금·학자금대출 절차)
+  scholarship: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=1010",
   // 학사일정 안내 페이지
   academicCalendar: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=930",
   // 주요사이트(학생지원) 안내 페이지 - 각종 문의처가 정리되어 있음
