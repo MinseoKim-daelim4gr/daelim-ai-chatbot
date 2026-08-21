@@ -289,8 +289,20 @@
     white-space: pre-line;
     color: var(--text);
   }
-  .course-cell { margin-bottom: 8px; }
-  .course-cell:last-child { margin-bottom: 0; }
+  .course-entries {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: 8px 10px;
+  }
+  .course-cell {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 9px;
+  }
+  .course-cell.intl {
+    background: var(--tag-night-bg);
+    border-color: var(--tag-night);
+  }
   .badge-tag {
     font-family: var(--font-mono);
     font-size: 10.5px;
@@ -302,6 +314,7 @@
   }
   .badge-tag.common { color: var(--tag-common); background: var(--tag-common-bg); }
   .badge-tag.elective { color: var(--tag-elective); background: var(--tag-elective-bg); }
+  .badge-tag.intl { color: var(--tag-night); background: var(--surface); }
 
   .table-scroll { overflow-x: auto; border-radius: 8px; }
 
@@ -478,6 +491,12 @@
     return null;
   }
 
+  // 외국인유학생 전용 강좌 판별: 강의명 자체("외국인유학생...")나
+  // 비자 유형 표기(예: (D-2), (E-9))가 있으면 유학생 전용 강좌로 간주
+  function isIntlCourse(text) {
+    return /외국인\s*유학생/.test(text) || /\([A-Z]-\d+\)/.test(text);
+  }
+
   function renderBoard(container, dayLabel, dayPeriods, nightPeriods, note) {
     container.innerHTML = '';
     var titleRow = el('div', 'day-view-title');
@@ -514,8 +533,10 @@
         }
         tr.appendChild(pcell);
         var ccell = document.createElement('td');
+        var grid = el('div', 'course-entries');
         p.entries.forEach(function (ent) {
           var block = el('div', 'course-cell');
+          if (isIntlCourse(ent.text)) block.classList.add('intl');
           var rc = el('span', 'room-code', ent.room.replace(/\n/g, ' '));
           block.appendChild(rc);
           var badge = classifyBadge(ent.text);
@@ -525,11 +546,17 @@
             block.appendChild(document.createElement('br'));
             block.appendChild(b);
           }
+          if (isIntlCourse(ent.text)) {
+            var ib = el('span', 'badge-tag intl', '외국인 유학생');
+            block.appendChild(document.createElement('br'));
+            block.appendChild(ib);
+          }
           var ctext = el('span', 'course-text', txt);
           block.appendChild(document.createElement('br'));
           block.appendChild(ctext);
-          ccell.appendChild(block);
+          grid.appendChild(block);
         });
+        ccell.appendChild(grid);
         tr.appendChild(ccell);
         tbody.appendChild(tr);
       });
