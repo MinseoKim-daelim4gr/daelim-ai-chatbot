@@ -244,6 +244,17 @@ body {
   margin-bottom: 10px;
 }
 
+/* FAQ 답변처럼 카드가 딱 1개뿐일 때는 5칸으로 쪼개면 폭이 화면의 1/5로 줄어들어
+   글자가 세로로 좁게 줄바꿈됨. 그렇다고 폭 전체를 다 채우면 PC 화면에서는
+   카드가 불필요하게 커지므로, 최소 240px(좁은 화면에서도 안 눌리게) ~
+   카드 자체 최대 420px(넓은 화면에서 과하게 안 커지게) 사이로만 잡음 */
+.card-row:has(.info-card:only-child) {
+  grid-template-columns: minmax(240px, 1fr);
+}
+.card-row:has(.info-card:only-child) .info-card {
+  max-width: 420px;
+}
+
 .info-card {
   border: 1px solid #e4e6ea;
   border-radius: 10px;
@@ -283,20 +294,54 @@ body {
   scrollbar-width: thin;
 }
 
+/* 한 화면에 보이는 목표 열 개수(5) 기준으로 칸 너비를 계산해서, 항목이
+   5칸 이하로 다 들어갈 때는 위에 있는 답변 말풍선(.bubble.assistant)과
+   같은 폭까지 꽉 채워짐. 질문이 늘어나서 5칸을 넘어가면 180px 아래로는
+   좁아지지 않고 원래 폭을 유지한 채 가로 스크롤됨(오른쪽 좌우 버튼은
+   FaqQuickReplies가 스크롤이 실제로 필요할 때만 보여줌) */
 .quick-replies-2 {
   display: grid;
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   grid-auto-flow: column;
-  grid-auto-columns: 240px;
+  grid-auto-columns: minmax(180px, calc((100% - 32px) / 5));
   gap: 8px;
   width: 100%;
   overflow-x: auto;
   padding: 2px 2px 6px;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
+.quick-replies-2:active {
+  cursor: grabbing;
+}
+
+.quick-replies-2::-webkit-scrollbar {
+  display: none;
+}
+
+/* 창이 좁아져서 칸이 최소 폭(180px) 밑으로는 안 줄어들 때, 원래(nowrap)
+   방식이면 글자가 알약 밖으로 삐져나감. 여기서는 줄바꿈을 허용하고
+   그에 맞춰 세로로도 자연스럽게 늘어나도록 alignment/모양을 조정함.
+   word-break: keep-all → 한글 단어(어절) 중간이 아니라 띄어쓰기 기준으로
+   줄바꿈되어 "언제야?"가 "언제/야?"처럼 잘리지 않음 */
 .quick-replies-2 .quick-reply-btn {
   width: 100%;
+  height: 100%;
+  min-height: 44px;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+  text-align: center;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quick-reply-btn {
