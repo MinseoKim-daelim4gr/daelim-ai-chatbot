@@ -45,13 +45,17 @@ export const MENU_NODES: Record<string, MenuNode> = {
       { label: "🎓 장학금", targetId: "scholarship" },
       { label: "💳 등록", targetId: "tuition" },
       { label: "📝 수강신청", targetId: "course" },
+      { label: "☀️ 계절학기", targetId: "seasonal" },
       { label: "📊 성적", targetId: "grades" },
-      { label: "☎️ 교내 연락처", targetId: "contacts" },
+      { label: "📜 증명서 발급", targetId: "certificate" },
       { label: "🏫 휴학", targetId: "leave" },
       { label: "🔄 복학", targetId: "return" },
       { label: "🔀 전과", targetId: "transfer" },
       { label: "🎖️ 군 학점인정", targetId: "course-military-credit" },
-      { label: "🚌 통학버스", targetId: "shuttle" },  
+      { label: "💼 조기취업", targetId: "early-employment" },
+      { label: "✅ P/F 과목", targetId: "pf-course" },
+      { label: "☎️ 교내 연락처", targetId: "contacts" },
+      { label: "🚌 통학버스", targetId: "shuttle" },
       { label: "❓ 자주 묻는 질문", targetId: "faq" },
     ],
   },
@@ -491,6 +495,10 @@ export const MENU_NODES: Record<string, MenuNode> = {
     intro: "수강신청 정정기간과 재수강 안내예요.",
     cards: [
       {
+        title: "정정기간",
+        body: "8.24(월) 10:00 ~ 8.28(금) 17:00\n학과·행정실 방문 없이 학생 본인이 직접 정정해요. 개강(9.1) 후 별도 정정 기간은 없어요.",
+      },
+      {
         title: "재수강 신청 조건",
         body: "기 취득 학점이 C+ 이하인 교과목만 재수강할 수 있어요.\n재수강 학점은 해당 학기 수강신청 학점 범위 내에서 신청해야 해요.\n별도 메뉴 없이 기존 수강신청 화면에서 재수강 과목을 신청하면 돼요.",
         link: { label: "포털 바로가기", url: OFFICIAL_LINKS.portal },
@@ -565,10 +573,6 @@ export const MENU_NODES: Record<string, MenuNode> = {
       {
         title: "BeACE P/F 1학점",
         body: '"직업세계와 자기계발(BeACE) P/F 1학점"은 별도 수강신청 없이, BeACE 이수 기준을 충족하면 취업팀에서 자동으로 부여해요(수업연한 초과자는 제외).\n성적열람 기간에 확인 가능하고, 이수 기준 충족 여부는 취업팀에서 확인할 수 있어요.',
-      },
-      {
-        title: "군 학점인정 신청",
-        body: '2026학년도 2학기 군 학점인정 신청: 9.28(월) ~ 10.2(금) 예정\n자세한 내용은 학사공지게시판의 "군 학점인정 설명서"를 참고하세요.',
       },
       {
         title: "P/F 과목 인정 기준",
@@ -899,7 +903,7 @@ export const MENU_NODES: Record<string, MenuNode> = {
       { label: "처음으로", targetId: "root" },
     ],
   },
-  
+
   // ----- 복학 (2026학년도 2학기 복학신청 안내 공지 기준) -----
   return: {
     id: "return",
@@ -1212,6 +1216,201 @@ export const MENU_NODES: Record<string, MenuNode> = {
     ],
   },
 
+  // ----- 증명서 발급 (증명서발급 공지 기준) -----
+  certificate: {
+    id: "certificate",
+    intro: "증명서 발급 안내해드릴게요! 아래에서 궁금한 내용을 선택해주세요.",
+    topLink: { label: "📋 증명서발급 안내 공지 보기", url: OFFICIAL_LINKS.certificateNotice },
+    quickReplies: [
+      { label: "증명서 종류", targetId: "certificate-types" },
+      { label: "발급 방법(자동발급기·인터넷·FAX)", targetId: "certificate-issue" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+  "certificate-types": {
+    id: "certificate-types",
+    intro: "증명서 종류예요.",
+    cards: [
+      {
+        title: "국문 증명서",
+        body: "재학, 졸업, 졸업예정, 성적, 휴학, 제적, 교육비 납입 증명서",
+      },
+      {
+        title: "영문 증명서",
+        body: "졸업, 성적 증명서",
+      },
+      {
+        title: "유의사항",
+        body: "증명서는 전문학사, 학사학위 전공심화, 전문기술석사 각 과정별로 별도로 신청해야 해요.\n성적증명서의 평점평균은 소수점 이하 3자리에서 반올림하여 2자리까지 표기돼요.",
+      },
+    ],
+    quickReplies: [
+      { label: "증명서 메뉴로", targetId: "certificate" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+  "certificate-issue": {
+    id: "certificate-issue",
+    intro: "증명서 발급절차예요. (학교 자동발급기 → FAX민원 발급 → 인터넷 증명발급 순서로 안내)",
+    cards: [
+      {
+        title: "학교 자동발급기",
+        body: "위치: 홍지관 2층(카페앞), 대학본부 1층, 율곡관 3층(자판기옆)\n재학생 로그인: 학생포털시스템과 동일(아이디: 학번, 비밀번호: 포털 비밀번호)\n졸업생 로그인: 본인인증로그인(PASS, 카카오, 토스 등)\n아이디·비밀번호가 기억나지 않으면 대학홈페이지 학생포털시스템에서 찾기 가능",
+      },
+      {
+        title: "FAX민원 발급",
+        body: "가까운 시·군·구청 또는 행정복지센터(주민센터)에서 신청할 수 있어요.",
+      },
+      {
+        title: "인터넷 증명발급",
+        body: "인터넷증명발급센터에서 회원가입 후 발급받을 수 있어요.",
+        link: { label: "인터넷증명발급센터 바로가기", url: OFFICIAL_LINKS.certificateIssueCenter },
+      },
+      {
+        title: "기타 문의",
+        body: "교육행정팀 031-467-4715로 문의하시거나 업무시간 내 방문해주세요.",
+      },
+    ],
+    quickReplies: [
+      { label: "증명서 메뉴로", targetId: "certificate" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+
+  // ----- 계절학기 (계절학기 개설 안내 공지 기준) -----
+  seasonal: {
+    id: "seasonal",
+    intro: "계절학기 안내해드릴게요! 아래에서 궁금한 내용을 선택해주세요.",
+    topLink: { label: "📋 계절학기 개설 안내 공지 보기", url: OFFICIAL_LINKS.seasonalSemesterNotice },
+    quickReplies: [
+      { label: "개설 안내", targetId: "seasonal-open" },
+      { label: "수강신청·수강절차", targetId: "seasonal-apply" },
+      { label: "성적·수강료", targetId: "seasonal-fee" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+  "seasonal-open": {
+    id: "seasonal-open",
+    intro: "계절학기 개설 안내예요.",
+    cards: [
+      {
+        title: "개설시기·개설기간",
+        body: "동·하계 방학을 이용해 개설돼요.\n계절학기 수강신청 후 3주(15일)간 편성돼요(개설기간 내에 현장실습을 진행해야 하는 경우 계절학기 수강을 할 수 없어요).",
+      },
+      {
+        title: "개설과목",
+        body: "전공 또는 교양과목이 개설돼요.\n수강신청 인원이 10명 이하인 교과목은 폐강될 수 있어요.",
+      },
+    ],
+    quickReplies: [
+      { label: "계절학기 메뉴로", targetId: "seasonal" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+  "seasonal-apply": {
+    id: "seasonal-apply",
+    intro: "계절학기 수강신청과 수강절차예요.",
+    cards: [
+      {
+        title: "수강신청 기간·대상",
+        body: "신청기간: 6월, 12월 종강 후 지정된 일자(세부 일정은 별도 공지)\n신청대상: 정규학기(2년제 4학기, 3년제 6학기)를 모두 이수한 학생만 신청할 수 있어요.\n수강신청 인원은 강좌에 따라 제한될 수 있어요.",
+      },
+      {
+        title: "수강신청 학점",
+        body: "최대 9학점까지 신청할 수 있어요(계절학기로 취득할 수 있는 학점은 총 9학점이에요).",
+      },
+      {
+        title: "수강절차",
+        body: "STEP 1. 교육행정팀 - 수강 신청서 교부\nSTEP 2. 수강신청자 - 수강 신청서 작성 및 확인\nSTEP 3. 교육행정팀 - 계절학기 수강신청\nSTEP 4. 수강신청자 - 수강료 납부 후 수강",
+      },
+    ],
+    quickReplies: [
+      { label: "계절학기 메뉴로", targetId: "seasonal" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+  "seasonal-fee": {
+    id: "seasonal-fee",
+    intro: "계절학기 성적 처리와 수강료예요.",
+    cards: [
+      {
+        title: "성적",
+        body: "계절학기에서 이수한 학점은 졸업이수학점에 포함되지만 당해학기 성적에서는 제외돼요.\n출결, 시험, 평가 등의 성적평가는 정규학기와 동일하게 운영돼요.",
+      },
+      {
+        title: "수강료 (감면·면제 없음)",
+        body: "1학점당 8만원씩 부과돼요.\n3학점 신청: 24만원\n6학점 신청: 48만원\n9학점 신청: 72만원",
+      },
+    ],
+    quickReplies: [
+      { label: "계절학기 메뉴로", targetId: "seasonal" },
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+
+  // ----- 조기취업 -----
+  "early-employment": {
+    id: "early-employment",
+    intro: "조기취업 시 출석 인정 안내예요.",
+    cards: [
+      {
+        title: "대상",
+        body: "마지막 학기(수업연한 1년제 2학기[전공심화], 2년제 4학기, 3년제 6학기)와 수업연한 초과자 중, 졸업사정 이후 최초(1개 학기)에 조기취업한 학생만 해당돼요(산업체위탁, P-Tech 제외).",
+      },
+      {
+        title: "출석 인정 기준",
+        body: "대면 수업만 출석이 인정되고, 원격(온라인) 수업의 출석은 인정되지 않아요.",
+      },
+      {
+        title: "학과 문의",
+        body: "세부 서류·신청 절차 등 더 궁금한 점은 소속 학과로 문의해주세요.",
+        link: { label: "학과별 연락처 보기", url: OFFICIAL_LINKS.departmentOffices },
+      },
+      {
+        title: "교육행정팀 문의",
+        body: "교육행정팀 031-467-4714",
+        link: { label: "부서별 연락처 보기", url: OFFICIAL_LINKS.officeContacts },
+      },
+    ],
+    quickReplies: [
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+
+  // ----- P/F 과목 -----
+  "pf-course": {
+    id: "pf-course",
+    intro: "P/F 과목 안내예요.",
+    topLink: { label: "💬 궁금한 점은 Q&A 게시판에서 질문하기", url: OFFICIAL_LINKS.qnaBoard },
+    cards: [
+      {
+        title: 'BeACE P/F 1학점',
+        body: '"직업세계와 자기계발(BeACE) P/F 1학점"은 2024학년도 2학기부터 별도 수강신청 없이, BeACE 이수 기준을 충족하면 취업팀에서 자동으로 부여해요(수업연한 초과자는 제외).\nBeACE 1학점은 성적열람 기간에 확인 가능하며, 이수 기준 충족 여부는 취업팀에서 확인할 수 있어요.',
+      },
+      {
+        title: "P/F 과목 인정 기준",
+        body: "P/F 과목은 졸업학점에는 포함되지만 평점에는 반영되지 않아요.",
+      },
+      {
+        title: "P/F 학점 한도",
+        body: "재학 중 최대 6학점까지만 인정돼요(BeACE, 어학, 봉사, 창업, 군 학점인정, 각 사업단 P/F 교과목 포함).",
+      },
+      {
+        title: "한 학기 P/F 2학점 수강 가능 여부",
+        body: "죄송해요, 이 부분은 저희가 확인한 학교 측 공식 답변이 아직 없어요. 최근 관련 Q&A도 있었던 만큼, 아래 Q&A 게시판이나 교육행정팀(031-467-4714)에 직접 문의해서 정확히 확인해주세요.",
+        link: { label: "Q&A 게시판 바로가기", url: OFFICIAL_LINKS.qnaBoard },
+      },
+      {
+        title: "문의처",
+        body: "교육행정팀 031-467-4714",
+        link: { label: "부서별 연락처 보기", url: OFFICIAL_LINKS.officeContacts },
+      },
+    ],
+    quickReplies: [
+      { label: "처음으로", targetId: "root" },
+    ],
+  },
+
   // ----- 자주 묻는 질문 (버튼을 누르면 미리 작성된 답변 화면으로 바로 이동, LLM 호출 없음) -----
   faq: {
     id: "faq",
@@ -1226,6 +1425,10 @@ export const MENU_NODES: Record<string, MenuNode> = {
       { label: "휴학하면 등록금 어떻게 돼?", targetId: "faq-leave-refund" },
       { label: "복학은 언제 신청해?", targetId: "faq-return-period" },
       { label: "통학버스는 언제 다녀?", targetId: "faq-shuttle-general" },
+      { label: "증명서는 어디서 발급받아?", targetId: "faq-certificate-issue" },
+      { label: "계절학기 수강신청은 어떻게 해?", targetId: "faq-seasonal-apply" },
+      { label: "조기취업하면 출석 어떻게 돼?", targetId: "faq-early-employment-detail" },
+      { label: "P/F 과목은 몇 학점까지 인정돼?", targetId: "faq-pf-limit-detail" },
       { label: "처음으로", targetId: "root" },
     ],
   },

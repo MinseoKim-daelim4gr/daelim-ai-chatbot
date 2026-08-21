@@ -35,6 +35,30 @@ function formatTime(ms: number) {
   return new Date(ms).toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" });
 }
 
+// Gemini 답변 텍스트에 학교 페이지 URL이 그대로 섞여 나올 때(마크다운이 아닌
+// 순수 텍스트라 링크가 안 눌리는 문제), URL만 찾아서 실제로 클릭 가능한
+// 링크로 바꿔줌. URL 문자 집합만 매칭해서 뒤에 붙는 한글 조사(예: "...해서")나
+// 문장부호가 링크에 딸려 들어가지 않게 함
+const URL_PATTERN = /(https?:\/\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]+)/g;
+
+function linkifyText(text: string) {
+  const parts = text.split(URL_PATTERN);
+  return parts.map((part, i) => {
+    if (!part.startsWith("http")) return part;
+    // 문장 끝의 마침표/쉼표/괄호 등은 URL이 아니라 문장부호일 가능성이 높아서 분리
+    const trailingPunct = part.match(/[).,!?;:]+$/)?.[0] ?? "";
+    const url = trailingPunct ? part.slice(0, -trailingPunct.length) : part;
+    return (
+      <span key={i}>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="answer-link">
+          {url}
+        </a>
+        {trailingPunct}
+      </span>
+    );
+  });
+}
+
 export default function Chat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -301,8 +325,9 @@ export default function Chat() {
               <section>
                 <h3>안내 가능한 주제</h3>
                 <p>
-                  장학 · 등록 · 수강신청 · 군 학점인정 · 성적 · 휴학 · 복학 ·
-                  전과 · 통학버스 · 교내 연락처
+                  장학 · 등록 · 수강신청 · 계절학기 · 군 학점인정 · 성적 ·
+                  증명서 발급 · 휴학 · 복학 · 전과 · 조기취업 · P/F 과목 ·
+                  통학버스 · 교내 연락처
                 </p>
               </section>
               <section>
@@ -556,12 +581,20 @@ function TurnView({
             아예 없는 상태라 배지를 보여주지 않음 */}
         {!turn.failed && <span className="answer-badge ai">🤖 AI 생성 답변 · 확인 필요</span>}
         <div className="bubble assistant">
-          {turn.text || (turn.streaming ? "답변 작성 중..." : "")}
+          {turn.text
+            ? linkifyText(turn.text)
+            : turn.streaming
+              ? "답변 작성 중..."
+              : ""}
         </div>
-        {/* 우리가 미리 준비해둔 10개 주제 밖의 질문일 수도 있는 답변이라,
+        {/* 우리가 미리 준비해둔 14개 주제 밖의 질문일 수도 있는 답변이라,
             AI가 아무리 그럴듯하게 답해도 실제 학사 처리 기준과 다를 수 있음을
             매번 안내함. 스트리밍이 끝난 뒤에만 보여줘서 "작성 중..." 상태와
-            겹치지 않게 함 */}
+            겹치지 않게 함. (예전엔 이 아래에 Q&A 게시판/교내 연락처 버튼을
+            항상 붙였는데, 로그인이 필요한 Q&A 게시판이나 뭉뚱그린 연락처
+            안내가 모든 질문에 맞지는 않아서 뺐음 — 대신 시스템 프롬프트가
+            상황에 맞는 실제 링크를 답변 안에 직접 골라 넣고, 위 linkifyText가
+            그 링크를 눌러서 바로 이동 가능하게 바꿔줌) */}
         {!turn.streaming && turn.text && !turn.failed && (
           <p className="ai-disclaimer">
             ※ 정확한 내용은 학교 홈페이지나 담당 부서에 다시 확인해주세요.

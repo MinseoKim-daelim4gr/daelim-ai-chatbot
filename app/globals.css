@@ -519,6 +519,18 @@ body {
   color: var(--duc-gray);
 }
 
+/* AI 답변 텍스트 안에 그대로 섞여 나오는 학교 페이지 URL을 실제로 눌러서
+   이동할 수 있는 링크로 표시(app/page.tsx의 linkifyText가 감싸는 <a>) */
+.answer-link {
+  color: var(--duc-blue-dark);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.answer-link:hover {
+  color: var(--duc-blue);
+}
+
 /* AI 응답 실패(구글 서버 과부하 등) 시 같은 질문을 바로 재시도할 수 있는 버튼 */
 .retry-btn {
   align-self: flex-start;

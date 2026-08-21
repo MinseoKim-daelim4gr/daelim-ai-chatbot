@@ -23,6 +23,8 @@ export const OFFICIAL_LINKS = {
   leaveOfAbsenceInfo: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=780",
   // 학과별 연락처 안내 페이지
   departmentOffices: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=310&CONTENTS_NO=2",
+  // 부서별 연락처 안내 페이지
+  officeContacts: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=310&CONTENTS_NO=1",
   // 소단위전공 - 학과형
   minorProgramGeneral: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=5300",
   // 소단위전공 - 혁신융합대학사업
@@ -45,17 +47,15 @@ export const OFFICIAL_LINKS = {
   // 2026학년도 2학기 2차 주거안정장학금 신청 공지 (신청방법 붙임파일 포함)
   scholarshipHousingNotice:
     "https://www.daelim.ac.kr/cms/FrBoardCon/BoardView.do?MENU_ID=990&CONTENTS_NO=&SITE_NO=2&BOARD_SEQ=9&BBS_SEQ=128819&P_BBS_SEQ=&pageNo=1",
-  // 교외장학금 안내 공지(세종이도인재장학금)
+  // 교외장학금 안내 공지 ①
   scholarshipExternal1:
     "https://www.daelim.ac.kr/cms/FrBoardCon/BoardView.do?MENU_ID=990&CONTENTS_NO=&SITE_NO=2&BOARD_SEQ=9&BBS_SEQ=128822&P_BBS_SEQ=&pageNo=1",
-  // 교외장학금 안내 공지([서울시미래인재재단] 2026년 하반기 서울인재대학장학금)
+  // 교외장학금 안내 공지 ②
   scholarshipExternal2:
     "https://www.daelim.ac.kr/cms/FrBoardCon/BoardView.do?MENU_ID=990&CONTENTS_NO=&SITE_NO=2&BOARD_SEQ=9&BBS_SEQ=128815&P_BBS_SEQ=&pageNo=1",
-  // 교외장학금 안내 공지([안양시인재육성재단] 2026 ESG 행복 장학생 선발 안내)
+  // 교외장학금 안내 공지 ③
   scholarshipExternal3:
     "https://www.daelim.ac.kr/cms/FrBoardCon/BoardView.do?MENU_ID=990&CONTENTS_NO=&SITE_NO=2&BOARD_SEQ=9&BBS_SEQ=128814&P_BBS_SEQ=&pageNo=1",
-  // 부서별 연락처 안내 페이지
-  officeContacts: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=310&CONTENTS_NO=1", 
   // 성적평가 방법 및 성적산출(백분위 환산) 안내 페이지
   gradesEvaluationNotice: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=810&CONTENTS_NO=1",
   // 2026학년도 2학기 군 학점인정(군 복무경험/군 교육훈련/사회복무요원) 안내 공지
@@ -69,4 +69,14 @@ export const OFFICIAL_LINKS = {
     "https://www.daelim.ac.kr/cms/FrBoardCon/BoardView.do?MENU_ID=900&CONTENTS_NO=&SITE_NO=2&BOARD_SEQ=8&BBS_SEQ=126330&P_BBS_SEQ=&pageNo=1",
   // 통학버스(안양역/범계역) 안내 페이지
   shuttleBusNotice: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=460",
-  };
+  // 증명서발급 안내 페이지 (증명서 종류/발급절차)
+  certificateNotice: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=3870&CONTENTS_NO=1",
+  // 인터넷증명발급센터 (회원가입 필요)
+  certificateIssueCenter: "https://daelim.certpia.com/",
+  // 계절학기 개설 안내 페이지
+  seasonalSemesterNotice: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=890&CONTENTS_NO=1",
+  // 학교 공식 Q&A 게시판 (로그인 필요 — 정말 다른 방법이 없을 때만 마지막 수단으로 안내)
+  qnaBoard: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=1040#page1",
+  // 학부/학과 안내 페이지 (전체 학과 목록·소개) - 특정 학과/전공 세부 질문에 안내
+  departmentDirectory: "https://www.daelim.ac.kr/cms/FrCon/index.do?MENU_ID=1760",
+};
