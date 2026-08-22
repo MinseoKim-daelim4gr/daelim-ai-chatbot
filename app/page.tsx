@@ -64,8 +64,15 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [lang, setLang] = useState<"ko" | "en">("ko");
-  const [showHelp, setShowHelp] = useState(false);
+  // 페이지에 처음 들어오면 사용방법 및 유의사항을 가장 먼저 보여주기 위해
+  // 기본값을 true로 시작함(우측 상단 "?" 버튼으로 다시 열고 닫는 동작은 그대로 유지됨)
+  const [showHelp, setShowHelp] = useState(true);
   const [suggestions, setSuggestions] = useState<FaqMatch[]>([]);
+  // 직전에 직접 입력했던 질문(또는 그 질문이 그 이전 질문과 이어붙여진 결과).
+  // "이어서 질문할게요" 같은 사족 없이 후속 질문을 해도 맥락이 이어지도록,
+  // 이번 질문 단독으로 막힐 때만 이 값과 합쳐서 한 번 더 시도하는 데 씀
+  // (완전한 대화 기록이 아니라 바로 직전 한 턴만 기억하는 가벼운 방식)
+  const [lastFreeTextQuery, setLastFreeTextQuery] = useState("");
 
   const idRef = useRef(0);
   const nextId = () => `t${++idRef.current}`;
@@ -100,7 +107,10 @@ export default function Chat() {
     let cancelled = false;
     const handle = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/faq?q=${encodeURIComponent(query)}`);
+        const prevParam = lastFreeTextQuery
+          ? `&prev=${encodeURIComponent(lastFreeTextQuery)}`
+          : "";
+        const res = await fetch(`/api/faq?q=${encodeURIComponent(query)}${prevParam}`);
         const data = await res.json();
         if (!cancelled) setSuggestions(data.matches || []);
       } catch {
@@ -111,7 +121,7 @@ export default function Chat() {
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [input, busy]);
+  }, [input, busy, lastFreeTextQuery]);
 
   function pushTurn(turn: Turn) {
     setTurns((prev) => [...prev, turn]);
@@ -136,6 +146,9 @@ export default function Chat() {
   async function goTo(targetId: string, label: string) {
     if (busy) return;
     setBusy(true);
+    // 버튼으로 다른 메뉴/주제로 명시적으로 이동한 거라, 이전에 직접 입력했던
+    // 질문 맥락은 여기서 끊어서 다음 자유 질문이 엉뚱하게 이어붙지 않게 함
+    setLastFreeTextQuery("");
     pushTurn({ id: nextId(), role: "user", text: label, time: Date.now() });
     const loadingId = nextId();
     pushTurn({ id: loadingId, role: "bot", kind: "loading" });
@@ -173,12 +186,19 @@ export default function Chat() {
     setBusy(true);
 
     try {
-      const res = await fetch(`/api/faq?q=${encodeURIComponent(query)}`);
+      const prevParam = lastFreeTextQuery
+        ? `&prev=${encodeURIComponent(lastFreeTextQuery)}`
+        : "";
+      const res = await fetch(`/api/faq?q=${encodeURIComponent(query)}${prevParam}`);
       const data = await res.json();
       const matches: FaqMatch[] = data.matches || [];
+      // 이번 질문 단독으로 막혀서 직전 질문과 합쳐진 경우, 그 합쳐진 문장을
+      // 기준으로 FAQ를 찾거나 Gemini에게 물어봄(맥락이 살아있는 채로 답하기 위해)
+      const effectiveQuery: string = data.effectiveQuery || query;
 
       if (matches.length > 0) {
         pushTurn({ id: nextId(), role: "bot", kind: "faq-suggest", matches, time: Date.now() });
+        setLastFreeTextQuery(effectiveQuery);
       } else if (data.blocked) {
         pushTurn({
           id: nextId(),
@@ -187,6 +207,9 @@ export default function Chat() {
           message: data.blockedMessage,
           time: Date.now(),
         });
+        // 직전 질문과 합쳐도 여전히 막힌 거라, 여기서 맥락을 끊어서 다음
+        // 질문이 엉뚱한 이전 화제와 잘못 이어붙지 않게 함
+        setLastFreeTextQuery("");
       } else {
         const botId = nextId();
         pushTurn({
@@ -196,9 +219,10 @@ export default function Chat() {
           text: "",
           streaming: true,
           time: Date.now(),
-          query,
+          query: effectiveQuery,
         });
-        await streamGeminiReply(query, botId);
+        setLastFreeTextQuery(effectiveQuery);
+        await streamGeminiReply(effectiveQuery, botId);
       }
     } finally {
       setBusy(false);
@@ -327,7 +351,7 @@ export default function Chat() {
                 <p>
                   장학 · 등록 · 수강신청 · 계절학기 · 군 학점인정 · 성적 ·
                   증명서 발급 · 휴학 · 복학 · 전과 · 조기취업 · P/F 과목 ·
-                  통학버스 · 교내 연락처 · 교양 시간표
+                  통학버스 · 교내 연락처
                 </p>
               </section>
               <section>
@@ -453,9 +477,12 @@ function TurnView({
       <div className="bubble-row">
         <div className="bot-block">
           {/* 이 답변이 Gemini가 즉석에서 만든 게 아니라, 학교 공식 공지사항을
-              바탕으로 우리가 직접 정리해둔 내용이라는 걸 한눈에 보여주는 배지.
-              루트 메뉴(첫 화면)는 "답변"이 아니라 그냥 초기 화면이라 배지를 생략함 */}
-          {!isRoot && <span className="answer-badge official">✅ 학교 공식 안내 기반</span>}
+              바탕으로 우리가 직접 수집·정리해둔 내용이라는 걸 한눈에 보여주는 배지.
+              "즉시 답변 = AI를 안 쓴다"는 오해를 막기 위해 "우리가 직접 모아서
+              정리해둔 것"이라는 뉘앙스를 문구에 명시적으로 넣음(아래 AI 배지와
+              대비되도록). 루트 메뉴(첫 화면)는 "답변"이 아니라 그냥 초기 화면이라
+              배지를 생략함 */}
+          {!isRoot && <span className="answer-badge official">✅ 학교 공식 자료 수집·정리 기반</span>}
           {!isRoot && <div className="bubble assistant">{node.intro}</div>}
 
           {node.topLink && (
@@ -599,7 +626,9 @@ function TurnView({
             그 링크를 눌러서 바로 이동 가능하게 바꿔줌) */}
         {!turn.streaming && turn.text && !turn.failed && (
           <p className="ai-disclaimer">
-            ※ 정확한 내용은 학교 홈페이지나 담당 부서에 다시 확인해주세요.
+            ⚠️ 이 답변은 AI가 생성한 내용으로, 실제와 다르거나 잘못되었을 수
+            있습니다. 자세한 내용은 학교 홈페이지나 관련 부서에 연락하여 다시
+            확인해주세요.
           </p>
         )}
         {/* 구글 서버 일시 과부하처럼 우리 쪽 잘못이 아닌 실패는, 질문을 다시
